@@ -1,0 +1,30 @@
+{
+    "name": "template-vite",
+    "description": "A Phaser 3 template using Vite.",
+    "version": "1.0.3",
+    "type": "module",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/phaserjs/template-vite.git"
+    },
+    "author": "Phaser Studio <support@phaser.io> (https://phaser.io/)",
+    "license": "MIT",
+    "licenseUrl": "http://www.opensource.org/licenses/mit-license.php",
+    "bugs": {
+        "url": "https://github.com/phaserjs/template-vite/issues"
+    },
+    "homepage": "https://github.com/phaserjs/template-vite#readme",
+    "scripts": {
+        "sass": "sass src/sass/main.scss public/style.css -w",
+        "dev": "vite --config vite/config.dev.js",
+        "build": "vite build --config vite/config.prod.js"
+    },
+    "devDependencies": {
+        "sass": "^1.70.0",
+        "terser": "^5.27.0",
+        "vite": "^5.0.8"
+    },
+    "dependencies": {
+        "phaser": "^3.70.0"
+    }
+}
