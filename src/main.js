@@ -1,5 +1,5 @@
-import { PreLoader } from './scenes/preloader.js';
-import { Battle } from './scenes/battle.js';
+import Preloader from './scenes/preloader.js';
+import Battle from './scenes/battle.js';
 
 const config = {
   type: Phaser.CANVAS,
@@ -12,7 +12,7 @@ const config = {
     autoCenter: Phaser.Scale.CENTER_BOTH,
     parent: 'game-container',
   },
-  scene: [PreLoader, Battle],
+  scene: [Preloader, Battle],
 };
 
 export default new Phaser.Game(config);

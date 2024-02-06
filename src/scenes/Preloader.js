@@ -9,7 +9,7 @@ import {
 } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
 
-export class PreLoader extends Scene {
+export default class PreLoader extends Scene {
   constructor() {
     super({
       key: SCENE_KEYS.PRELOAD_SCENE,

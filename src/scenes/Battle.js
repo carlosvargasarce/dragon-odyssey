@@ -7,10 +7,10 @@ import {
   MONSTER_ASSET_KEYS,
 } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
-import { BattleMenu } from '../battle/ui/menu/battleMenu.js';
+import { BattleMenu } from '../battle/ui/menu/battle-menu.js';
 import { DIRECTION } from '../common/direction.js';
 
-export class Battle extends Scene {
+export default class Battle extends Scene {
   /** @type {BattleMenu} */
   #battleMenu;
   /** @type {Phaser.Types.Input.Keyboard.CursorKeys} */
