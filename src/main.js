@@ -1,5 +1,5 @@
-import { PreLoader } from './scenes/PreLoader.js';
-import { Battle } from './scenes/Battle.js';
+import { PreLoader } from './scenes/preloader.js';
+import { Battle } from './scenes/battle.js';
 
 const config = {
   type: Phaser.CANVAS,
