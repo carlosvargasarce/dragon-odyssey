@@ -1,7 +1,6 @@
 import Phaser, { Scene } from 'phaser';
 import {
   BATTLE_ASSET_KEYS,
-  BATTLE_BACKGROUND_ASSET_KEYS,
   CLASSES_ASSET_KEYS,
   HEALTH_BAR_ASSET_KEYS,
   MONSTER_ASSET_KEYS,
@@ -9,6 +8,8 @@ import {
 import { SCENE_KEYS } from './scene-keys.js';
 import { BattleMenu } from '../battle/ui/menu/battle-menu.js';
 import { DIRECTION } from '../common/direction.js';
+import { Background } from '../battle/background.js';
+import { Healthbar } from '../battle/ui/healthbar.js';
 
 export default class Battle extends Scene {
   /** @type {BattleMenu} */
@@ -25,13 +26,15 @@ export default class Battle extends Scene {
   create() {
     console.log(`[${Battle.name}:create] invoked`);
     // Create main background
-    this.add.image(0, 0, BATTLE_BACKGROUND_ASSET_KEYS.FOREST).setOrigin(0);
+    const background = new Background(this);
+    background.showForest();
 
     // Render out the player and enemy monsters
     this.add.image(768, 144, MONSTER_ASSET_KEYS.CARNODUSK, 0);
     this.add.image(256, 276, CLASSES_ASSET_KEYS.BERSEKER, 0);
 
     // Render out the player health bar
+    const playerHealthBar = new Healthbar(this, 34, 34);
     const playerMonsterName = this.add.text(
       30,
       20,
@@ -47,7 +50,7 @@ export default class Battle extends Scene {
         .image(0, 0, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND)
         .setOrigin(0),
       playerMonsterName,
-      this.#createHealthBar(34, 34),
+      playerHealthBar.container,
       this.add.text(playerMonsterName.width + 35, 23, 'L5', {
         color: '#ED474B',
         fontSize: '28px',
@@ -66,6 +69,7 @@ export default class Battle extends Scene {
     ]);
 
     // Render out the enemy health bar
+    const enemyHealthBar = new Healthbar(this, 34, 34);
     const enemyMonsterName = this.add.text(
       30,
       20,
@@ -82,7 +86,7 @@ export default class Battle extends Scene {
         .setOrigin(0)
         .setScale(1, 0.8),
       enemyMonsterName,
-      this.#createHealthBar(34, 34),
+      enemyHealthBar.container,
       this.add.text(enemyMonsterName.width + 35, 23, 'L5', {
         color: '#ED474B',
         fontSize: '28px',
@@ -103,18 +107,43 @@ export default class Battle extends Scene {
     this.escapeKey = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.ESC
     );
+    this.enterKey = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.ENTER
+    );
+
+    playerHealthBar.setMeterPercentageAnimated(0.5, {
+      duration: 3000,
+      callback: () => {
+        console.log('animation completed');
+      },
+    });
   }
 
   update() {
-    const wasSpaceKeyPressed = Phaser.Input.Keyboard.JustDown(
-      this.#cursorKeys.space
-    );
-
+    // const wasSpaceKeyPressed = Phaser.Input.Keyboard.JustDown(
+    //   this.#cursorKeys.space
+    // );
+    const wasEnterKeyPressed = Phaser.Input.Keyboard.JustDown(this.enterKey);
     const wasEscapeKeyPressed = Phaser.Input.Keyboard.JustDown(this.escapeKey);
 
-    if (wasSpaceKeyPressed) {
+    if (wasEnterKeyPressed) {
       this.#battleMenu.handlePlayerInput('OK');
-      return;
+
+      //Check if the player selected and attack, and update display text
+      if (this.#battleMenu.selectedAttack === undefined) {
+        return;
+      }
+
+      console.log(
+        `Player selected the following move: ${this.#battleMenu.selectedAttack}`
+      );
+      this.#battleMenu.hideMonsterAttackSubMenu();
+      this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
+        ['Your monster attacks the enemy'],
+        () => {
+          this.#battleMenu.showMainBattleMenu();
+        }
+      );
     }
 
     if (wasEscapeKeyPressed) {
@@ -138,37 +167,5 @@ export default class Battle extends Scene {
     if (selectedDirection != DIRECTION.NONE) {
       this.#battleMenu.handlePlayerInput(selectedDirection);
     }
-  }
-
-  /**
-   *
-   * @param {number} x the x position to place the health bar container
-   * @param {number} y the y position to place the health bar container
-   * @returns {Phaser.GameObjects.Container}
-   *
-   */
-
-  #createHealthBar(x, y) {
-    //This is to make the bar shorter
-    const scaleY = 0.7;
-
-    const leftCap = this.add
-      .image(x, y, HEALTH_BAR_ASSET_KEYS.LEFT_CAP)
-      .setOrigin(0, 0.5)
-      .setScale(1, scaleY);
-
-    const middle = this.add
-      .image(leftCap.x + leftCap.width, y, HEALTH_BAR_ASSET_KEYS.MIDDLE)
-      .setOrigin(0, 0.5)
-      .setScale(1, scaleY);
-
-    middle.displayWidth = 360;
-
-    const rightCap = this.add
-      .image(middle.x + middle.displayWidth, y, HEALTH_BAR_ASSET_KEYS.RIGHT_CAP)
-      .setOrigin(0, 0.5)
-      .setScale(1, scaleY);
-
-    return this.add.container(x, y, [leftCap, middle, rightCap]);
   }
 }
