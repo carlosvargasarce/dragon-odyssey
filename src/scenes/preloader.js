@@ -2,9 +2,10 @@ import { Scene } from 'phaser';
 import {
   BATTLE_ASSET_KEYS,
   BATTLE_BACKGROUND_ASSET_KEYS,
+  CLASSES_ASSET_KEYS,
+  DATA_ASSET_KEYS,
   HEALTH_BAR_ASSET_KEYS,
   MONSTER_ASSET_KEYS,
-  CLASSES_ASSET_KEYS,
   UI_ASSET_KEYS,
 } from '../assets/asset-keys.js';
 import { SCENE_KEYS } from './scene-keys.js';
@@ -45,6 +46,18 @@ export default class PreLoader extends Scene {
       HEALTH_BAR_ASSET_KEYS.LEFT_CAP,
       `${magicKingdomAssetPath}/ui/healthbar/barHorizontal_green_left.png`
     );
+    this.load.image(
+      HEALTH_BAR_ASSET_KEYS.RIGHT_CAP_SHADOW,
+      `${magicKingdomAssetPath}/ui/healthbar/barHorizontal_shadow_right.png`
+    );
+    this.load.image(
+      HEALTH_BAR_ASSET_KEYS.MIDDLE_SHADOW,
+      `${magicKingdomAssetPath}/ui/healthbar/barHorizontal_shadow_mid.png`
+    );
+    this.load.image(
+      HEALTH_BAR_ASSET_KEYS.LEFT_CAP_SHADOW,
+      `${magicKingdomAssetPath}/ui/healthbar/barHorizontal_shadow_left.png`
+    );
 
     // Monsters Assets
     this.load.image(
@@ -68,6 +81,9 @@ export default class PreLoader extends Scene {
       UI_ASSET_KEYS.CURSOR,
       `${magicKingdomAssetPath}/ui/cursor.png`
     );
+
+    // LOAD JSON DATA
+    this.load.json(DATA_ASSET_KEYS.ATTACKS, 'assets/data/attacks.json');
   }
 
   create() {
