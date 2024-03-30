@@ -1,5 +1,6 @@
 import { Scene } from 'phaser';
 import {
+  ATTACK_ASSET_KEYS,
   BATTLE_ASSET_KEYS,
   BATTLE_BACKGROUND_ASSET_KEYS,
   CLASSES_ASSET_KEYS,
@@ -8,6 +9,8 @@ import {
   MONSTER_ASSET_KEYS,
   UI_ASSET_KEYS,
 } from '../assets/asset-keys.js';
+import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../assets/font-keys.js';
+import { WebFontFileLoader } from '../assets/web-font-file-loader.js';
 import { SCENE_KEYS } from './scene-keys.js';
 
 export default class PreLoader extends Scene {
@@ -84,6 +87,39 @@ export default class PreLoader extends Scene {
 
     // LOAD JSON DATA
     this.load.json(DATA_ASSET_KEYS.ATTACKS, 'assets/data/attacks.json');
+
+    // LOAD CUSTOM FONTS
+    this.load.addFile(
+      new WebFontFileLoader(this.load, [KENNEY_FUTURE_NARROW_FONT_NAME])
+    );
+
+    //LOAD ATTACK ASSETS
+    this.load.spritesheet(
+      ATTACK_ASSET_KEYS.ICE_SHARD,
+      `${magicKingdomAssetPath}/attacks/ice-attack/active.png`,
+      {
+        frameWidth: 32,
+        frameHeight: 32,
+      }
+    );
+
+    this.load.spritesheet(
+      ATTACK_ASSET_KEYS.ICE_SHARD_START,
+      `${magicKingdomAssetPath}/attacks/ice-attack/start.png`,
+      {
+        frameWidth: 32,
+        frameHeight: 32,
+      }
+    );
+
+    this.load.spritesheet(
+      ATTACK_ASSET_KEYS.SLASH,
+      `${magicKingdomAssetPath}/attacks/slash.png`,
+      {
+        frameWidth: 48,
+        frameHeight: 48,
+      }
+    );
   }
 
   create() {

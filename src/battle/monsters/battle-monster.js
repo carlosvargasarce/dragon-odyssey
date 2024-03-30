@@ -1,4 +1,5 @@
 import { BATTLE_ASSET_KEYS } from '../../assets/asset-keys.js';
+import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../../assets/font-keys.js';
 import { DataUtils } from '../../utils/data-utils.js';
 import { Healthbar } from '../ui/healthbar.js';
 
@@ -163,6 +164,7 @@ export class BattleMonster {
     const monsterNameGameText = this._scene.add.text(30, 20, this.name, {
       color: '#7E3D3F',
       fontSize: '32px',
+      fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
     });
 
     const healthBarBgImage = this._scene.add
@@ -177,6 +179,7 @@ export class BattleMonster {
       {
         color: '#ED474B',
         fontSize: '28px',
+        fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
       }
     );
 
@@ -184,6 +187,7 @@ export class BattleMonster {
       color: '#ED474B',
       fontSize: '24px',
       fontStyle: 'italic',
+      fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
     });
 
     this._phaserHealthBarGameContainer = this._scene.add

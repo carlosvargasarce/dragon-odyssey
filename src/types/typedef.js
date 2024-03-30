@@ -7,6 +7,8 @@
  * @property {boolean} [skipBattleAnimation=false]
  */
 
+import { ATTACK_KEYS } from '../battle/attacks/attack-keys.js';
+
 /**
  * @typedef Monster
  * @type {Object}
@@ -33,5 +35,5 @@
  * @type {Object}
  * @property {number} id
  * @property {string} name
- * @property {string} animationName
+ * @property {ATTACK_KEYS} animationName
  */

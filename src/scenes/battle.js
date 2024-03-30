@@ -3,12 +3,18 @@ import {
   CLASSES_ASSET_KEYS,
   MONSTER_ASSET_KEYS,
 } from '../assets/asset-keys.js';
+//import { IceShard } from '../battle/attacks/ice-shard.js';
+import {
+  ATTACK_TARGET,
+  AttackManager,
+} from '../battle/attacks/attack-manager.js';
 import { Background } from '../battle/background.js';
 import { EnemyBattleMonster } from '../battle/monsters/enemy-battle-monster.js';
 import { PlayerBattleMonster } from '../battle/monsters/player-battle-monster.js';
 import { BattleMenu } from '../battle/ui/menu/battle-menu.js';
 import { DIRECTION } from '../common/direction.js';
 import { SKIP_BATTLE_ANIMATIONS } from '../config.js';
+import { createSceneTransition } from '../utils/scene-transition.js';
 import { StateMachine } from '../utils/state-machine.js';
 import { SCENE_KEYS } from './scene-keys.js';
 
@@ -37,6 +43,8 @@ export default class Battle extends Scene {
   #activePlayerAttackIndex;
   /** @type  {StateMachine} */
   #battleStateMachine;
+  /** @type  {AttackManager}} */
+  #attackManager;
 
   constructor() {
     super({
@@ -88,6 +96,7 @@ export default class Battle extends Scene {
     // Render out the main info and sub info panes
     this.#battleMenu = new BattleMenu(this, this.#activePlayerMonster);
     this.#createBattleStateMachine();
+    this.#attackManager = new AttackManager(this, SKIP_BATTLE_ANIMATIONS);
 
     // Add Cursor keys
     this.#cursorKeys = this.input.keyboard.createCursorKeys();
@@ -95,9 +104,9 @@ export default class Battle extends Scene {
     this.escapeKey = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.ESC
     );
-    this.enterKey = this.input.keyboard.addKey(
-      Phaser.Input.Keyboard.KeyCodes.ENTER
-    );
+    // this.enterKey = this.input.keyboard.addKey(
+    //   Phaser.Input.Keyboard.KeyCodes.ENTER
+    // );
   }
 
   update() {
@@ -181,14 +190,21 @@ export default class Battle extends Scene {
       }`,
       () => {
         this.time.delayedCall(500, () => {
-          this.#activeEnemyMonster.playTakeDamageAnimation(() => {
-            this.#activeEnemyMonster.takeDamage(
-              this.#activePlayerMonster.baseAttack,
-              () => {
-                this.#enemyAttack();
-              }
-            );
-          });
+          this.#attackManager.playAttackAnimation(
+            this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex]
+              .animationName,
+            ATTACK_TARGET.ENEMY,
+            () => {
+              this.#activeEnemyMonster.playTakeDamageAnimation(() => {
+                this.#activeEnemyMonster.takeDamage(
+                  this.#activePlayerMonster.baseAttack,
+                  () => {
+                    this.#enemyAttack();
+                  }
+                );
+              });
+            }
+          );
         });
       },
       SKIP_BATTLE_ANIMATIONS
@@ -207,16 +223,22 @@ export default class Battle extends Scene {
       }`,
       () => {
         this.time.delayedCall(500, () => {
-          this.#activePlayerMonster.playTakeDamageAnimation(() => {
-            this.#activePlayerMonster.takeDamage(
-              this.#activeEnemyMonster.baseAttack,
-              () => {
-                this.#battleStateMachine.setState(
-                  BATTLE_STATES.POST_ATTACK_CHECK
+          this.#attackManager.playAttackAnimation(
+            this.#activeEnemyMonster.attacks[0].animationName,
+            ATTACK_TARGET.PLAYER,
+            () => {
+              this.#activePlayerMonster.playTakeDamageAnimation(() => {
+                this.#activePlayerMonster.takeDamage(
+                  this.#activeEnemyMonster.baseAttack,
+                  () => {
+                    this.#battleStateMachine.setState(
+                      BATTLE_STATES.POST_ATTACK_CHECK
+                    );
+                  }
                 );
-              }
-            );
-          });
+              });
+            }
+          );
         });
       },
       SKIP_BATTLE_ANIMATIONS
@@ -277,8 +299,11 @@ export default class Battle extends Scene {
       name: BATTLE_STATES.INTRO,
       onEnter: () => {
         // Wait for any scene setup and transitions to complete
-        this.time.delayedCall(500, () => {
-          this.#battleStateMachine.setState(BATTLE_STATES.PRE_BATTLE_INFO);
+        createSceneTransition(this, {
+          skipSceneTransition: SKIP_BATTLE_ANIMATIONS,
+          callback: () => {
+            this.#battleStateMachine.setState(BATTLE_STATES.PRE_BATTLE_INFO);
+          },
         });
       },
     });
