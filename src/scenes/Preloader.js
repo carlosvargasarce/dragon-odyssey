@@ -1,12 +1,16 @@
 import { Scene } from 'phaser';
 import {
+  ATTACK_ASSET_KEYS,
   BATTLE_ASSET_KEYS,
   BATTLE_BACKGROUND_ASSET_KEYS,
-  HEALTH_BAR_ASSET_KEYS,
-  MONSTER_ASSET_KEYS,
+  CHARACTER_ASSET_KEYS,
   CLASSES_ASSET_KEYS,
+  DATA_ASSET_KEYS,
+  HEALTH_BAR_ASSET_KEYS,
   UI_ASSET_KEYS,
 } from '../assets/asset-keys.js';
+import { FUGAZ_ONE_FONT_NAME, LATO_FONT_NAME } from '../assets/font-keys.js';
+import { WebFontFileLoader } from '../assets/web-font-file-loader.js';
 import { SCENE_KEYS } from './scene-keys.js';
 
 export default class PreLoader extends Scene {
@@ -18,55 +22,103 @@ export default class PreLoader extends Scene {
 
   preload() {
     console.log(`[${PreLoader.name}:preload] invoked`);
-    const magicKingdomAssetPath = 'assets/images/magic-kingdom';
+    const dragonOdysseyAssetPath = 'assets/images/dragon-odyssey';
 
     // Background Assets
     this.load.image(
       BATTLE_BACKGROUND_ASSET_KEYS.FOREST,
-      `${magicKingdomAssetPath}/battle-backgrounds/forest-background.png`
+      `${dragonOdysseyAssetPath}/battle-backgrounds/forest-background.jpg`
     );
 
     // Battle Assets
     this.load.image(
       BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND,
-      `${magicKingdomAssetPath}/ui/healthbar/healthbar-bg.png`
+      `${dragonOdysseyAssetPath}/ui/healthbar/healthbar-bg.png`
     );
 
     // Healthbar Assets
     this.load.image(
       HEALTH_BAR_ASSET_KEYS.RIGHT_CAP,
-      `${magicKingdomAssetPath}/ui/healthbar/barHorizontal_green_right.png`
+      `${dragonOdysseyAssetPath}/ui/healthbar/barHorizontal_green_right.png`
     );
     this.load.image(
       HEALTH_BAR_ASSET_KEYS.MIDDLE,
-      `${magicKingdomAssetPath}/ui/healthbar/barHorizontal_green_mid.png`
+      `${dragonOdysseyAssetPath}/ui/healthbar/barHorizontal_green_mid.png`
     );
     this.load.image(
       HEALTH_BAR_ASSET_KEYS.LEFT_CAP,
-      `${magicKingdomAssetPath}/ui/healthbar/barHorizontal_green_left.png`
+      `${dragonOdysseyAssetPath}/ui/healthbar/barHorizontal_green_left.png`
+    );
+    this.load.image(
+      HEALTH_BAR_ASSET_KEYS.RIGHT_CAP_SHADOW,
+      `${dragonOdysseyAssetPath}/ui/healthbar/barHorizontal_shadow_right.png`
+    );
+    this.load.image(
+      HEALTH_BAR_ASSET_KEYS.MIDDLE_SHADOW,
+      `${dragonOdysseyAssetPath}/ui/healthbar/barHorizontal_shadow_mid.png`
+    );
+    this.load.image(
+      HEALTH_BAR_ASSET_KEYS.LEFT_CAP_SHADOW,
+      `${dragonOdysseyAssetPath}/ui/healthbar/barHorizontal_shadow_left.png`
     );
 
-    // Monsters Assets
+    // Characters Assets
     this.load.image(
-      MONSTER_ASSET_KEYS.CARNODUSK,
-      `${magicKingdomAssetPath}/monsters/carnodusk.png`
+      CHARACTER_ASSET_KEYS.SKELETON,
+      `${dragonOdysseyAssetPath}/enemies/skeleton.png`
     );
 
     this.load.image(
-      MONSTER_ASSET_KEYS.IGUANIGNITE,
-      `${magicKingdomAssetPath}/monsters/iguanignite.png`
+      CHARACTER_ASSET_KEYS.IGUANIGNITE,
+      `${dragonOdysseyAssetPath}/enemies/iguanignite.png`
     );
 
     // Classes Assets
     this.load.image(
       CLASSES_ASSET_KEYS.BERSEKER,
-      `${magicKingdomAssetPath}/classes/berseker.png`
+      `${dragonOdysseyAssetPath}/classes/berseker.png`
     );
 
     // UI Assets
     this.load.image(
       UI_ASSET_KEYS.CURSOR,
-      `${magicKingdomAssetPath}/ui/cursor.png`
+      `${dragonOdysseyAssetPath}/ui/cursor.png`
+    );
+
+    // LOAD JSON DATA
+    this.load.json(DATA_ASSET_KEYS.ATTACKS, 'assets/data/attacks.json');
+
+    // LOAD CUSTOM FONTS
+    this.load.addFile(
+      new WebFontFileLoader(this.load, [LATO_FONT_NAME, FUGAZ_ONE_FONT_NAME])
+    );
+
+    //LOAD ATTACK ASSETS
+    this.load.spritesheet(
+      ATTACK_ASSET_KEYS.ICE_SHARD,
+      `${dragonOdysseyAssetPath}/attacks/ice-attack/active.png`,
+      {
+        frameWidth: 32,
+        frameHeight: 32,
+      }
+    );
+
+    this.load.spritesheet(
+      ATTACK_ASSET_KEYS.ICE_SHARD_START,
+      `${dragonOdysseyAssetPath}/attacks/ice-attack/start.png`,
+      {
+        frameWidth: 32,
+        frameHeight: 32,
+      }
+    );
+
+    this.load.spritesheet(
+      ATTACK_ASSET_KEYS.SLASH,
+      `${dragonOdysseyAssetPath}/attacks/slash.png`,
+      {
+        frameWidth: 48,
+        frameHeight: 48,
+      }
     );
   }
 

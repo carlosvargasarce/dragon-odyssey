@@ -1,20 +1,50 @@
 import Phaser, { Scene } from 'phaser';
 import {
-  BATTLE_ASSET_KEYS,
-  BATTLE_BACKGROUND_ASSET_KEYS,
+  CHARACTER_ASSET_KEYS,
   CLASSES_ASSET_KEYS,
-  HEALTH_BAR_ASSET_KEYS,
-  MONSTER_ASSET_KEYS,
 } from '../assets/asset-keys.js';
-import { SCENE_KEYS } from './scene-keys.js';
+//import { IceShard } from '../battle/attacks/ice-shard.js';
+import {
+  ATTACK_TARGET,
+  AttackManager,
+} from '../battle/attacks/attack-manager.js';
+import { Background } from '../battle/background.js';
+import { EnemyBattleCharacter } from '../battle/characters/enemy-battle-character.js';
+import { PlayerBattleCharacter } from '../battle/characters/player-battle-character.js';
 import { BattleMenu } from '../battle/ui/menu/battle-menu.js';
 import { DIRECTION } from '../common/direction.js';
+import { SKIP_BATTLE_ANIMATIONS } from '../config.js';
+import { createSceneTransition } from '../utils/scene-transition.js';
+import { StateMachine } from '../utils/state-machine.js';
+import { SCENE_KEYS } from './scene-keys.js';
+
+const BATTLE_STATES = Object.freeze({
+  INTRO: 'INTRO',
+  PRE_BATTLE_INFO: 'PRE_BATTLE_INFO',
+  BRING_OUT_CHARACTER: 'BRING_OUT_CHARACTER',
+  PLAYER_INPUT: 'PLAYER_INPUT',
+  ENEMY_INPUT: 'ENEMY_INPUT',
+  BATTLE: 'BATTLE',
+  POST_ATTACK_CHECK: 'POST_ATTACK_CHECK',
+  FINISHED: 'FINISHED',
+  FLEE_ATTEMPT: ' FLEE_ATTEMPT',
+});
 
 export default class Battle extends Scene {
   /** @type {BattleMenu} */
   #battleMenu;
   /** @type {Phaser.Types.Input.Keyboard.CursorKeys} */
   #cursorKeys;
+  /** @type {EnemyBattleCharacter} */
+  #activeEnemyCharacter;
+  /** @type {PlayerBattleCharacter} */
+  #activePlayerCharacter;
+  /** @type {number} */
+  #activePlayerAttackIndex;
+  /** @type  {StateMachine} */
+  #battleStateMachine;
+  /** @type  {AttackManager}} */
+  #attackManager;
 
   constructor() {
     super({
@@ -22,99 +52,112 @@ export default class Battle extends Scene {
     });
   }
 
+  init() {
+    this.#activePlayerAttackIndex = -1;
+  }
+
   create() {
     console.log(`[${Battle.name}:create] invoked`);
     // Create main background
-    this.add.image(0, 0, BATTLE_BACKGROUND_ASSET_KEYS.FOREST).setOrigin(0);
+    const background = new Background(this);
+    background.showForest();
 
-    // Render out the player and enemy monsters
-    this.add.image(768, 144, MONSTER_ASSET_KEYS.CARNODUSK, 0);
-    this.add.image(256, 276, CLASSES_ASSET_KEYS.BERSEKER, 0);
+    // Render out the player and enemy characters
+    this.#activeEnemyCharacter = new EnemyBattleCharacter({
+      scene: this,
+      characterDetails: {
+        name: CHARACTER_ASSET_KEYS.SKELETON,
+        assetKey: CHARACTER_ASSET_KEYS.SKELETON,
+        assetFrame: 0,
+        currentHp: 25,
+        maxHp: 25,
+        attackIds: [1],
+        baseAttack: 15,
+        currentLevel: 5,
+      },
+      skipBattleAnimation: SKIP_BATTLE_ANIMATIONS,
+    });
 
-    // Render out the player health bar
-    const playerMonsterName = this.add.text(
-      30,
-      20,
-      MONSTER_ASSET_KEYS.CARNODUSK,
-      {
-        color: '#7E3D3F',
-        fontSize: '32px',
-      }
-    );
-
-    this.add.container(561, 320, [
-      this.add
-        .image(0, 0, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND)
-        .setOrigin(0),
-      playerMonsterName,
-      this.#createHealthBar(34, 34),
-      this.add.text(playerMonsterName.width + 35, 23, 'L5', {
-        color: '#ED474B',
-        fontSize: '28px',
-      }),
-      this.add.text(30, 55, 'HP', {
-        color: '#ED474B',
-        fontSize: '24px',
-        fontStyle: 'italic',
-      }),
-      this.add
-        .text(443, 80, '25/25', {
-          color: '#7E3D3F',
-          fontSize: '16px',
-        })
-        .setOrigin(1, 0),
-    ]);
-
-    // Render out the enemy health bar
-    const enemyMonsterName = this.add.text(
-      30,
-      20,
-      CLASSES_ASSET_KEYS.BERSEKER,
-      {
-        color: '#7E3D3F',
-        fontSize: '32px',
-      }
-    );
-
-    this.add.container(6, 6, [
-      this.add
-        .image(0, 0, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND)
-        .setOrigin(0)
-        .setScale(1, 0.8),
-      enemyMonsterName,
-      this.#createHealthBar(34, 34),
-      this.add.text(enemyMonsterName.width + 35, 23, 'L5', {
-        color: '#ED474B',
-        fontSize: '28px',
-      }),
-      this.add.text(30, 55, 'HP', {
-        color: '#ED474B',
-        fontSize: '24px',
-        fontStyle: 'italic',
-      }),
-    ]);
+    this.#activePlayerCharacter = new PlayerBattleCharacter({
+      scene: this,
+      characterDetails: {
+        name: CLASSES_ASSET_KEYS.BERSEKER,
+        assetKey: CLASSES_ASSET_KEYS.BERSEKER,
+        assetFrame: 0,
+        currentHp: 25,
+        maxHp: 25,
+        attackIds: [2],
+        baseAttack: 5,
+        currentLevel: 5,
+      },
+      skipBattleAnimation: SKIP_BATTLE_ANIMATIONS,
+    });
 
     // Render out the main info and sub info panes
-    this.#battleMenu = new BattleMenu(this);
-    this.#battleMenu.showMainBattleMenu();
+    this.#battleMenu = new BattleMenu(this, this.#activePlayerCharacter);
+    this.#createBattleStateMachine();
+    this.#attackManager = new AttackManager(this, SKIP_BATTLE_ANIMATIONS);
 
     // Add Cursor keys
     this.#cursorKeys = this.input.keyboard.createCursorKeys();
+
     this.escapeKey = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.ESC
     );
+    // this.enterKey = this.input.keyboard.addKey(
+    //   Phaser.Input.Keyboard.KeyCodes.ENTER
+    // );
   }
 
   update() {
+    this.#battleStateMachine.update();
     const wasSpaceKeyPressed = Phaser.Input.Keyboard.JustDown(
       this.#cursorKeys.space
     );
-
+    // const wasEnterKeyPressed = Phaser.Input.Keyboard.JustDown(this.enterKey);
     const wasEscapeKeyPressed = Phaser.Input.Keyboard.JustDown(this.escapeKey);
+
+    // Limit input based on the current battle state we are in
+    // If we are not in the right battle state, return early and do not process input
+    if (
+      wasSpaceKeyPressed &&
+      (this.#battleStateMachine.currentStateName ===
+        BATTLE_STATES.PRE_BATTLE_INFO ||
+        this.#battleStateMachine.currentStateName ===
+          BATTLE_STATES.POST_ATTACK_CHECK ||
+        this.#battleStateMachine.currentStateName ===
+          BATTLE_STATES.FLEE_ATTEMPT)
+    ) {
+      this.#battleMenu.handlePlayerInput('OK');
+      return;
+    }
+
+    if (
+      this.#battleStateMachine.currentStateName != BATTLE_STATES.PLAYER_INPUT
+    ) {
+      return;
+    }
 
     if (wasSpaceKeyPressed) {
       this.#battleMenu.handlePlayerInput('OK');
-      return;
+
+      //Check if the player selected and attack, and update display text
+      if (this.#battleMenu.selectedAttack === undefined) {
+        return;
+      }
+
+      this.#activePlayerAttackIndex = this.#battleMenu.selectedAttack;
+
+      if (!this.#activePlayerCharacter.attacks[this.#activePlayerAttackIndex]) {
+        return;
+      }
+
+      console.log(
+        `Player selected the following move: ${this.#battleMenu.selectedAttack}`
+      );
+
+      this.#battleMenu.hideCharacterAttackSubMenu();
+      this.#battleStateMachine.setState(BATTLE_STATES.ENEMY_INPUT);
     }
 
     if (wasEscapeKeyPressed) {
@@ -140,35 +183,228 @@ export default class Battle extends Scene {
     }
   }
 
-  /**
-   *
-   * @param {number} x the x position to place the health bar container
-   * @param {number} y the y position to place the health bar container
-   * @returns {Phaser.GameObjects.Container}
-   *
-   */
+  #playerAttack() {
+    this.#battleMenu.updateInfoPaneMessagesNoInputRequired(
+      `${this.#activePlayerCharacter.name} used ${
+        this.#activePlayerCharacter.attacks[this.#activePlayerAttackIndex].name
+      }`,
+      () => {
+        this.time.delayedCall(500, () => {
+          this.#attackManager.playAttackAnimation(
+            this.#activePlayerCharacter.attacks[this.#activePlayerAttackIndex]
+              .animationName,
+            ATTACK_TARGET.ENEMY,
+            () => {
+              this.#activeEnemyCharacter.playTakeDamageAnimation(() => {
+                this.#activeEnemyCharacter.takeDamage(
+                  this.#activePlayerCharacter.baseAttack,
+                  () => {
+                    this.#enemyAttack();
+                  }
+                );
+              });
+            }
+          );
+        });
+      },
+      SKIP_BATTLE_ANIMATIONS
+    );
+  }
 
-  #createHealthBar(x, y) {
-    //This is to make the bar shorter
-    const scaleY = 0.7;
+  #enemyAttack() {
+    if (this.#activeEnemyCharacter.isFainted) {
+      this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+      return;
+    }
 
-    const leftCap = this.add
-      .image(x, y, HEALTH_BAR_ASSET_KEYS.LEFT_CAP)
-      .setOrigin(0, 0.5)
-      .setScale(1, scaleY);
+    this.#battleMenu.updateInfoPaneMessagesNoInputRequired(
+      `for ${this.#activeEnemyCharacter.name} used ${
+        this.#activeEnemyCharacter.attacks[0].name
+      }`,
+      () => {
+        this.time.delayedCall(500, () => {
+          this.#attackManager.playAttackAnimation(
+            this.#activeEnemyCharacter.attacks[0].animationName,
+            ATTACK_TARGET.PLAYER,
+            () => {
+              this.#activePlayerCharacter.playTakeDamageAnimation(() => {
+                this.#activePlayerCharacter.takeDamage(
+                  this.#activeEnemyCharacter.baseAttack,
+                  () => {
+                    this.#battleStateMachine.setState(
+                      BATTLE_STATES.POST_ATTACK_CHECK
+                    );
+                  }
+                );
+              });
+            }
+          );
+        });
+      },
+      SKIP_BATTLE_ANIMATIONS
+    );
+  }
 
-    const middle = this.add
-      .image(leftCap.x + leftCap.width, y, HEALTH_BAR_ASSET_KEYS.MIDDLE)
-      .setOrigin(0, 0.5)
-      .setScale(1, scaleY);
+  #postBattleSequenceCheck() {
+    if (this.#activeEnemyCharacter.isFainted) {
+      this.#activeEnemyCharacter.playDeathAnimation(() => {
+        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
+          [
+            `Wild ${this.#activeEnemyCharacter.name} fainted`,
+            'You have gain some experience',
+          ],
+          () => {
+            this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
+          },
+          SKIP_BATTLE_ANIMATIONS
+        );
+      });
 
-    middle.displayWidth = 360;
+      return;
+    }
 
-    const rightCap = this.add
-      .image(middle.x + middle.displayWidth, y, HEALTH_BAR_ASSET_KEYS.RIGHT_CAP)
-      .setOrigin(0, 0.5)
-      .setScale(1, scaleY);
+    if (this.#activePlayerCharacter.isFainted) {
+      this.#activePlayerCharacter.playDeathAnimation(() => {
+        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
+          [
+            `${this.#activePlayerCharacter.name} fainted`,
+            'You have no more warriors, escaping to safety...',
+          ],
+          () => {
+            this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
+          },
+          SKIP_BATTLE_ANIMATIONS
+        );
+      });
+      return;
+    }
 
-    return this.add.container(x, y, [leftCap, middle, rightCap]);
+    this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
+  }
+
+  #transitionToNextScene() {
+    this.cameras.main.fadeOut(600, 0, 0, 0);
+    this.cameras.main.once(
+      Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
+      () => {
+        this.scene.start(SCENE_KEYS.BATTLE_SCENE);
+      }
+    );
+  }
+
+  #createBattleStateMachine() {
+    this.#battleStateMachine = new StateMachine('battle', this);
+
+    this.#battleStateMachine.addState({
+      name: BATTLE_STATES.INTRO,
+      onEnter: () => {
+        // Wait for any scene setup and transitions to complete
+        createSceneTransition(this, {
+          skipSceneTransition: SKIP_BATTLE_ANIMATIONS,
+          callback: () => {
+            this.#battleStateMachine.setState(BATTLE_STATES.PRE_BATTLE_INFO);
+          },
+        });
+      },
+    });
+
+    this.#battleStateMachine.addState({
+      name: BATTLE_STATES.PRE_BATTLE_INFO,
+      onEnter: () => {
+        // Wait for enemy character to appear on the screen and notify player about the wild character
+        this.#activeEnemyCharacter.playCharacterAppearAnimation(() => {
+          this.#activeEnemyCharacter.playCharacterHealthBarAppearAnimation(
+            () => undefined
+          );
+          this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
+            [`Wild ${this.#activeEnemyCharacter.name} appeared!`],
+            () => {
+              // Wait for text animation to complete and move to next state
+              this.#battleStateMachine.setState(
+                BATTLE_STATES.BRING_OUT_CHARACTER
+              );
+            },
+            SKIP_BATTLE_ANIMATIONS
+          );
+        });
+      },
+    });
+
+    this.#battleStateMachine.addState({
+      name: BATTLE_STATES.BRING_OUT_CHARACTER,
+      onEnter: () => {
+        // Wait for player character to appear on the screen and notify the player about character
+        this.#activePlayerCharacter.playCharacterAppearAnimation(() => {
+          this.#activePlayerCharacter.playCharacterHealthBarAppearAnimation(
+            () => undefined
+          );
+          this.#battleMenu.updateInfoPaneMessagesNoInputRequired(
+            `Go ${this.#activePlayerCharacter.name}!`,
+            () => {
+              // Wait for text animation to complete and move to next state
+              this.time.delayedCall(1200, () => {
+                this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
+              });
+            },
+            SKIP_BATTLE_ANIMATIONS
+          );
+        });
+      },
+    });
+
+    this.#battleStateMachine.addState({
+      name: BATTLE_STATES.PLAYER_INPUT,
+      onEnter: () => {
+        this.#battleMenu.showMainBattleMenu();
+      },
+    });
+
+    this.#battleStateMachine.addState({
+      name: BATTLE_STATES.ENEMY_INPUT,
+      onEnter: () => {
+        //TODO: Add feature in the future update
+        // Pick a randome move fro the enemy monser, and in the future implement some type of AI behavor
+
+        this.#battleStateMachine.setState(BATTLE_STATES.BATTLE);
+      },
+    });
+
+    this.#battleStateMachine.addState({
+      name: BATTLE_STATES.BATTLE,
+      onEnter: () => {
+        // General battle flow
+        this.#playerAttack();
+      },
+    });
+
+    this.#battleStateMachine.addState({
+      name: BATTLE_STATES.POST_ATTACK_CHECK,
+      onEnter: () => {
+        this.#postBattleSequenceCheck();
+      },
+    });
+
+    this.#battleStateMachine.addState({
+      name: BATTLE_STATES.FINISHED,
+      onEnter: () => {
+        this.#transitionToNextScene();
+      },
+    });
+
+    this.#battleStateMachine.addState({
+      name: BATTLE_STATES.FLEE_ATTEMPT,
+      onEnter: () => {
+        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
+          [`You got away safely!`],
+          () => {
+            this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
+          },
+          SKIP_BATTLE_ANIMATIONS
+        );
+      },
+    });
+
+    //Start the state machine
+    this.#battleStateMachine.setState('INTRO');
   }
 }
