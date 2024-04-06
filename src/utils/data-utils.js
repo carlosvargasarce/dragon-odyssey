@@ -1,7 +1,7 @@
 import { DATA_ASSET_KEYS } from '../assets/asset-keys.js';
 
 export class DataUtils {
-  static getMonsterAttack(scene, attackId) {
+  static getCharacterAttack(scene, attackId) {
     /** @type {import('../types/typedef.js').Attack[]} */
     const data = scene.cache.json.get(DATA_ASSET_KEYS.ATTACKS);
 

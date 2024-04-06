@@ -1,13 +1,13 @@
 import { BATTLE_ASSET_KEYS } from '../../assets/asset-keys.js';
-import { KENNEY_FUTURE_NARROW_FONT_NAME } from '../../assets/font-keys.js';
+import { FUGAZ_ONE_FONT_NAME, LATO_FONT_NAME } from '../../assets/font-keys.js';
 import { DataUtils } from '../../utils/data-utils.js';
 import { Healthbar } from '../ui/healthbar.js';
 
-export class BattleMonster {
+export class BattleCharacter {
   /**@protected @type {Phaser.Scene}*/
   _scene;
-  /**@protected @type {import('../../types/typedef.js').Monster}*/
-  _monsterDetails;
+  /**@protected @type {import('../../types/typedef.js').Character}*/
+  _characterDetails;
   /**@protected @type {Healthbar}*/
   _healthBar;
   /**@protected @type {Phaser.GameObjects.Image}*/
@@ -17,7 +17,7 @@ export class BattleMonster {
   /**@protected @type {number}*/
   _maxHealth;
   /**@protected @type {import('../../types/typedef.js').Attack}*/
-  _monsterAttacks;
+  _characterAttacks;
   /**@protected @type {Phaser.GameObjects.Container}*/
   _phaserHealthBarGameContainer;
   /**@protected @type {boolean}*/
@@ -25,36 +25,39 @@ export class BattleMonster {
 
   /**
    *
-   * @param {import('../../types/typedef.js').BattleMonsterConfig} config
+   * @param {import('../../types/typedef.js').BattleCharacterConfig} config
    * @param {import('../../types/typedef.js').Coordinate} position
    * @param {number} scale
    *
    */
   constructor(config, position, scale) {
     this._scene = config.scene;
-    this._monsterDetails = config.monsterDetails;
-    this._currentHealth = this._monsterDetails.currentHp;
-    this._maxHealth = this._monsterDetails.maxHp;
-    this._monsterAttacks = [];
+    this._characterDetails = config.characterDetails;
+    this._currentHealth = this._characterDetails.currentHp;
+    this._maxHealth = this._characterDetails.maxHp;
+    this._characterAttacks = [];
     this._skipBattleAnimations = config.skipBattleAnimation || false;
 
     this._phaserGameObject = this._scene.add
       .image(
         position.x,
         position.y,
-        this._monsterDetails.assetKey,
-        this._monsterDetails.assetFrame || 0
+        this._characterDetails.assetKey,
+        this._characterDetails.assetFrame || 0
       )
       .setScale(scale)
       .setAlpha(0);
 
     this.#createHealthBarComponents(config.scaleHealthBarBackgroundImageByY);
 
-    this._monsterDetails.attackIds.forEach((attackId) => {
-      const monsterAttack = DataUtils.getMonsterAttack(this._scene, attackId);
+    this._characterDetails.attackIds.forEach((attackId) => {
+      const characterAttack = DataUtils.getCharacterAttack(
+        this._scene,
+        attackId
+      );
 
-      if (monsterAttack !== undefined) {
-        this._monsterAttacks.push(monsterAttack);
+      if (characterAttack !== undefined) {
+        this._characterAttacks.push(characterAttack);
       }
     });
   }
@@ -66,22 +69,22 @@ export class BattleMonster {
 
   /** @type {string}*/
   get name() {
-    return this._monsterDetails.name;
+    return this._characterDetails.name;
   }
 
   /** @type {import('../../types/typedef.js').Attack[]}*/
   get attacks() {
-    return [...this._monsterAttacks];
+    return [...this._characterAttacks];
   }
 
   /** @type {number}*/
   get baseAttack() {
-    return this._monsterDetails.baseAttack;
+    return this._characterDetails.baseAttack;
   }
 
   /** @type {number}*/
   get level() {
-    return this._monsterDetails.currentLevel;
+    return this._characterDetails.currentLevel;
   }
 
   /**
@@ -89,7 +92,7 @@ export class BattleMonster {
    * @param {() => void} [callback]
    */
   takeDamage(damage, callback) {
-    //Update current monster health and animaet health bar
+    //Update current character health and animaet health bar
     this._currentHealth -= damage;
 
     if (this._currentHealth < 0) {
@@ -107,8 +110,8 @@ export class BattleMonster {
    * @param {() => void} callback
    * @returns {void}
    */
-  playMonsterAppearAnimation(callback) {
-    throw new Error('playMonsterAppearAnimation is not implemented.');
+  playCharacterAppearAnimation(callback) {
+    throw new Error('playCharacterAppearAnimation is not implemented.');
   }
 
   /**
@@ -116,8 +119,10 @@ export class BattleMonster {
    * @param {() => void} callback
    * @returns {void}
    */
-  playMonsterHeakthBarAppearAnimation(callback) {
-    throw new Error('playMonsterHeakthBarAppearAnimation is not implemented.');
+  playCharacterHeakthBarAppearAnimation(callback) {
+    throw new Error(
+      'playCharacterHeakthBarAppearAnimation is not implemented.'
+    );
   }
 
   /**
@@ -161,42 +166,41 @@ export class BattleMonster {
   #createHealthBarComponents(scaleHealthBarBackgroundImageByY = 1) {
     this._healthBar = new Healthbar(this._scene, 34, 34);
 
-    const monsterNameGameText = this._scene.add.text(30, 20, this.name, {
-      color: '#7E3D3F',
+    const characterNameGameText = this._scene.add.text(30, 15, this.name, {
+      color: '#FFFFFF',
       fontSize: '32px',
-      fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
+      fontFamily: FUGAZ_ONE_FONT_NAME,
     });
 
     const healthBarBgImage = this._scene.add
-      .image(0, 0, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND)
+      .image(6, 0, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND)
       .setOrigin(0)
-      .setScale(1, scaleHealthBarBackgroundImageByY);
+      .setScale(0.5, scaleHealthBarBackgroundImageByY);
 
-    const monsterHealthBarLevelText = this._scene.add.text(
-      monsterNameGameText.width + 35,
+    const characterHealthBarLevelText = this._scene.add.text(
+      characterNameGameText.width + 35,
       23,
-      `L${this.level}`,
+      `Lv.${this.level}`,
       {
-        color: '#ED474B',
+        color: '#D22727',
         fontSize: '28px',
-        fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
+        fontFamily: LATO_FONT_NAME,
       }
     );
 
-    const monsterHpText = this._scene.add.text(30, 55, 'HP', {
-      color: '#ED474B',
+    const characterHpText = this._scene.add.text(30, 55, 'HP', {
+      color: '#D22727',
       fontSize: '24px',
-      fontStyle: 'italic',
-      fontFamily: KENNEY_FUTURE_NARROW_FONT_NAME,
+      fontFamily: LATO_FONT_NAME,
     });
 
     this._phaserHealthBarGameContainer = this._scene.add
       .container(6, 6, [
         healthBarBgImage,
-        monsterNameGameText,
+        characterNameGameText,
         this._healthBar.container,
-        monsterHealthBarLevelText,
-        monsterHpText,
+        characterHealthBarLevelText,
+        characterHpText,
       ])
       .setAlpha(0);
   }

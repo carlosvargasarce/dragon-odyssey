@@ -1,26 +1,61 @@
-import { BattleMonster } from './battle-monster.js';
+import { LATO_FONT_NAME } from '../../assets/font-keys.js';
+import { BattleCharacter } from './battle-character.js';
 
 /**
  * @type {import("../../types/typedef.js").Coordinate}
  */
-const ENEMY_POSITION = Object.freeze({
-  x: 768,
-  y: 144,
+const PLAYER_POSITION = Object.freeze({
+  x: 256,
+  y: 275,
 });
 
 const SCALE = 1;
 
-export class EnemyBattleMonster extends BattleMonster {
+export class PlayerBattleCharacter extends BattleCharacter {
+  /** @type {Phaser.GameObjects.Text} */
+  #healthBarTextGameObject;
+
   /**
    *
-   * @param {import("../../types/typedef.js").BattleMonsterConfig} config
+   * @param {import("../../types/typedef.js").BattleCharacterConfig} config
    */
   constructor(config) {
     super(
-      { ...config, scaleHealthBarBackgroundImageByY: 0.8 },
-      ENEMY_POSITION,
+      { ...config, scaleHealthBarBackgroundImageByY: 0.47 },
+      PLAYER_POSITION,
       SCALE
     );
+    this._phaserHealthBarGameContainer.setPosition(553, 325);
+
+    this.#addHealthBarComponents();
+  }
+
+  #setHealthBarText() {
+    this.#healthBarTextGameObject.setText(
+      `${this._currentHealth}/${this._maxHealth}`
+    );
+  }
+
+  #addHealthBarComponents() {
+    this.#healthBarTextGameObject = this._scene.add
+      .text(443, 80, '', {
+        color: '#FFFFFF',
+        fontSize: '16px',
+        fontFamily: LATO_FONT_NAME,
+      })
+      .setOrigin(1, 0);
+
+    this.#setHealthBarText();
+    this._phaserHealthBarGameContainer.add(this.#healthBarTextGameObject);
+  }
+
+  /**
+   * @param {number} damage
+   * @param {() => void} [callback]
+   */
+  takeDamage(damage, callback) {
+    super.takeDamage(damage, callback);
+    this.#setHealthBarText();
   }
 
   /**
@@ -28,10 +63,10 @@ export class EnemyBattleMonster extends BattleMonster {
    * @param {() => void} callback
    * @returns {void}
    */
-  playMonsterAppearAnimation(callback) {
+  playCharacterAppearAnimation(callback) {
     const startXPos = -30;
-    const endXPos = ENEMY_POSITION.x;
-    this._phaserGameObject.setPosition(startXPos, ENEMY_POSITION.y);
+    const endXPos = PLAYER_POSITION.x;
+    this._phaserGameObject.setPosition(startXPos, PLAYER_POSITION.y);
     this._phaserGameObject.setAlpha(1);
 
     if (this._skipBattleAnimations) {
@@ -42,7 +77,7 @@ export class EnemyBattleMonster extends BattleMonster {
 
     this._scene.tweens.add({
       delay: 0,
-      duration: 1600,
+      duration: 800,
       x: {
         from: startXPos,
         start: startXPos,
@@ -60,9 +95,9 @@ export class EnemyBattleMonster extends BattleMonster {
    * @param {() => void} callback
    * @returns {void}
    */
-  playMonsterHealthBarAppearAnimation(callback) {
-    const startXPos = -600;
-    const endXPos = 0;
+  playCharacterHealthBarAppearAnimation(callback) {
+    const startXPos = 800;
+    const endXPos = this._phaserHealthBarGameContainer.x;
     this._phaserHealthBarGameContainer.setPosition(
       startXPos,
       this._phaserHealthBarGameContainer.y
@@ -77,7 +112,7 @@ export class EnemyBattleMonster extends BattleMonster {
 
     this._scene.tweens.add({
       delay: 0,
-      duration: 1500,
+      duration: 800,
       x: {
         from: startXPos,
         start: startXPos,
@@ -97,7 +132,7 @@ export class EnemyBattleMonster extends BattleMonster {
    */
   playDeathAnimation(callback) {
     const startYPos = this._phaserGameObject.y;
-    const endYPos = startYPos - 400;
+    const endYPos = startYPos + 400;
 
     if (this._skipBattleAnimations) {
       this._phaserGameObject.setY(endYPos);

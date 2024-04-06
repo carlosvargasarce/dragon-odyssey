@@ -6,9 +6,9 @@ export const CLASSES_ASSET_KEYS = Object.freeze({
   BERSEKER: 'BERSEKER',
 });
 
-export const MONSTER_ASSET_KEYS = Object.freeze({
+export const CHARACTER_ASSET_KEYS = Object.freeze({
   IGUANIGNITE: 'IGUANIGNITE',
-  CARNODUSK: 'CARNODUSK',
+  SKELETON: 'SKELETON',
 });
 
 export const BATTLE_ASSET_KEYS = Object.freeze({

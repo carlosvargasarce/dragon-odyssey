@@ -18,8 +18,9 @@ export class WebFontFileLoader extends Phaser.Loader.File {
   }
 
   load() {
+    console.log('FONT NAMES', this.#fontNames);
     WebFont.load({
-      custom: {
+      google: {
         families: this.#fontNames,
       },
       active: () => {
@@ -27,7 +28,7 @@ export class WebFontFileLoader extends Phaser.Loader.File {
       },
       inactive: () => {
         console.error(
-          `Failed to load custom fonts ${JSON.stringify(this.#fontNames)}`
+          `Failed to load google fonts ${JSON.stringify(this.#fontNames)}`
         );
         this.loader.nextFile(this, false);
       },

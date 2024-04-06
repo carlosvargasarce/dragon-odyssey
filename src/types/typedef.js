@@ -1,8 +1,8 @@
 /**
- * @typedef BattleMonsterConfig
+ * @typedef BattleCharacterConfig
  * @type {Object}
  * @property {Phaser.Scene} scene
- * @property {Monster} monsterDetails
+ * @property {Character} characterDetails
  * @property {number} [scaleHealthBarBackgroundImageByY=1]
  * @property {boolean} [skipBattleAnimation=false]
  */
@@ -10,7 +10,7 @@
 import { ATTACK_KEYS } from '../battle/attacks/attack-keys.js';
 
 /**
- * @typedef Monster
+ * @typedef Character
  * @type {Object}
  * @property {string} name
  * @property {string} assetKey

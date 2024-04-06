@@ -1,7 +1,7 @@
 import Phaser, { Scene } from 'phaser';
 import {
+  CHARACTER_ASSET_KEYS,
   CLASSES_ASSET_KEYS,
-  MONSTER_ASSET_KEYS,
 } from '../assets/asset-keys.js';
 //import { IceShard } from '../battle/attacks/ice-shard.js';
 import {
@@ -9,8 +9,8 @@ import {
   AttackManager,
 } from '../battle/attacks/attack-manager.js';
 import { Background } from '../battle/background.js';
-import { EnemyBattleMonster } from '../battle/monsters/enemy-battle-monster.js';
-import { PlayerBattleMonster } from '../battle/monsters/player-battle-monster.js';
+import { EnemyBattleCharacter } from '../battle/characters/enemy-battle-character.js';
+import { PlayerBattleCharacter } from '../battle/characters/player-battle-character.js';
 import { BattleMenu } from '../battle/ui/menu/battle-menu.js';
 import { DIRECTION } from '../common/direction.js';
 import { SKIP_BATTLE_ANIMATIONS } from '../config.js';
@@ -21,7 +21,7 @@ import { SCENE_KEYS } from './scene-keys.js';
 const BATTLE_STATES = Object.freeze({
   INTRO: 'INTRO',
   PRE_BATTLE_INFO: 'PRE_BATTLE_INFO',
-  BRING_OUT_MONSTER: 'BRING_OUT_MONSTER',
+  BRING_OUT_CHARACTER: 'BRING_OUT_CHARACTER',
   PLAYER_INPUT: 'PLAYER_INPUT',
   ENEMY_INPUT: 'ENEMY_INPUT',
   BATTLE: 'BATTLE',
@@ -35,10 +35,10 @@ export default class Battle extends Scene {
   #battleMenu;
   /** @type {Phaser.Types.Input.Keyboard.CursorKeys} */
   #cursorKeys;
-  /** @type {EnemyBattleMonster} */
-  #activeEnemyMonster;
-  /** @type {PlayerBattleMonster} */
-  #activePlayerMonster;
+  /** @type {EnemyBattleCharacter} */
+  #activeEnemyCharacter;
+  /** @type {PlayerBattleCharacter} */
+  #activePlayerCharacter;
   /** @type {number} */
   #activePlayerAttackIndex;
   /** @type  {StateMachine} */
@@ -62,12 +62,12 @@ export default class Battle extends Scene {
     const background = new Background(this);
     background.showForest();
 
-    // Render out the player and enemy monsters
-    this.#activeEnemyMonster = new EnemyBattleMonster({
+    // Render out the player and enemy characters
+    this.#activeEnemyCharacter = new EnemyBattleCharacter({
       scene: this,
-      monsterDetails: {
-        name: MONSTER_ASSET_KEYS.CARNODUSK,
-        assetKey: MONSTER_ASSET_KEYS.CARNODUSK,
+      characterDetails: {
+        name: CHARACTER_ASSET_KEYS.SKELETON,
+        assetKey: CHARACTER_ASSET_KEYS.SKELETON,
         assetFrame: 0,
         currentHp: 25,
         maxHp: 25,
@@ -78,9 +78,9 @@ export default class Battle extends Scene {
       skipBattleAnimation: SKIP_BATTLE_ANIMATIONS,
     });
 
-    this.#activePlayerMonster = new PlayerBattleMonster({
+    this.#activePlayerCharacter = new PlayerBattleCharacter({
       scene: this,
-      monsterDetails: {
+      characterDetails: {
         name: CLASSES_ASSET_KEYS.BERSEKER,
         assetKey: CLASSES_ASSET_KEYS.BERSEKER,
         assetFrame: 0,
@@ -94,7 +94,7 @@ export default class Battle extends Scene {
     });
 
     // Render out the main info and sub info panes
-    this.#battleMenu = new BattleMenu(this, this.#activePlayerMonster);
+    this.#battleMenu = new BattleMenu(this, this.#activePlayerCharacter);
     this.#createBattleStateMachine();
     this.#attackManager = new AttackManager(this, SKIP_BATTLE_ANIMATIONS);
 
@@ -148,7 +148,7 @@ export default class Battle extends Scene {
 
       this.#activePlayerAttackIndex = this.#battleMenu.selectedAttack;
 
-      if (!this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex]) {
+      if (!this.#activePlayerCharacter.attacks[this.#activePlayerAttackIndex]) {
         return;
       }
 
@@ -156,7 +156,7 @@ export default class Battle extends Scene {
         `Player selected the following move: ${this.#battleMenu.selectedAttack}`
       );
 
-      this.#battleMenu.hideMonsterAttackSubMenu();
+      this.#battleMenu.hideCharacterAttackSubMenu();
       this.#battleStateMachine.setState(BATTLE_STATES.ENEMY_INPUT);
     }
 
@@ -185,19 +185,19 @@ export default class Battle extends Scene {
 
   #playerAttack() {
     this.#battleMenu.updateInfoPaneMessagesNoInputRequired(
-      `${this.#activePlayerMonster.name} used ${
-        this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex].name
+      `${this.#activePlayerCharacter.name} used ${
+        this.#activePlayerCharacter.attacks[this.#activePlayerAttackIndex].name
       }`,
       () => {
         this.time.delayedCall(500, () => {
           this.#attackManager.playAttackAnimation(
-            this.#activePlayerMonster.attacks[this.#activePlayerAttackIndex]
+            this.#activePlayerCharacter.attacks[this.#activePlayerAttackIndex]
               .animationName,
             ATTACK_TARGET.ENEMY,
             () => {
-              this.#activeEnemyMonster.playTakeDamageAnimation(() => {
-                this.#activeEnemyMonster.takeDamage(
-                  this.#activePlayerMonster.baseAttack,
+              this.#activeEnemyCharacter.playTakeDamageAnimation(() => {
+                this.#activeEnemyCharacter.takeDamage(
+                  this.#activePlayerCharacter.baseAttack,
                   () => {
                     this.#enemyAttack();
                   }
@@ -212,24 +212,24 @@ export default class Battle extends Scene {
   }
 
   #enemyAttack() {
-    if (this.#activeEnemyMonster.isFainted) {
+    if (this.#activeEnemyCharacter.isFainted) {
       this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
       return;
     }
 
     this.#battleMenu.updateInfoPaneMessagesNoInputRequired(
-      `for ${this.#activeEnemyMonster.name} used ${
-        this.#activeEnemyMonster.attacks[0].name
+      `for ${this.#activeEnemyCharacter.name} used ${
+        this.#activeEnemyCharacter.attacks[0].name
       }`,
       () => {
         this.time.delayedCall(500, () => {
           this.#attackManager.playAttackAnimation(
-            this.#activeEnemyMonster.attacks[0].animationName,
+            this.#activeEnemyCharacter.attacks[0].animationName,
             ATTACK_TARGET.PLAYER,
             () => {
-              this.#activePlayerMonster.playTakeDamageAnimation(() => {
-                this.#activePlayerMonster.takeDamage(
-                  this.#activeEnemyMonster.baseAttack,
+              this.#activePlayerCharacter.playTakeDamageAnimation(() => {
+                this.#activePlayerCharacter.takeDamage(
+                  this.#activeEnemyCharacter.baseAttack,
                   () => {
                     this.#battleStateMachine.setState(
                       BATTLE_STATES.POST_ATTACK_CHECK
@@ -246,11 +246,11 @@ export default class Battle extends Scene {
   }
 
   #postBattleSequenceCheck() {
-    if (this.#activeEnemyMonster.isFainted) {
-      this.#activeEnemyMonster.playDeathAnimation(() => {
+    if (this.#activeEnemyCharacter.isFainted) {
+      this.#activeEnemyCharacter.playDeathAnimation(() => {
         this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
           [
-            `Wild ${this.#activeEnemyMonster.name} fainted`,
+            `Wild ${this.#activeEnemyCharacter.name} fainted`,
             'You have gain some experience',
           ],
           () => {
@@ -263,11 +263,11 @@ export default class Battle extends Scene {
       return;
     }
 
-    if (this.#activePlayerMonster.isFainted) {
-      this.#activePlayerMonster.playDeathAnimation(() => {
+    if (this.#activePlayerCharacter.isFainted) {
+      this.#activePlayerCharacter.playDeathAnimation(() => {
         this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
           [
-            `${this.#activePlayerMonster.name} fainted`,
+            `${this.#activePlayerCharacter.name} fainted`,
             'You have no more warriors, escaping to safety...',
           ],
           () => {
@@ -311,17 +311,17 @@ export default class Battle extends Scene {
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.PRE_BATTLE_INFO,
       onEnter: () => {
-        // Wait for enemy monster to appear on the screen and notify player about the wild monster
-        this.#activeEnemyMonster.playMonsterAppearAnimation(() => {
-          this.#activeEnemyMonster.playMonsterHealthBarAppearAnimation(
+        // Wait for enemy character to appear on the screen and notify player about the wild character
+        this.#activeEnemyCharacter.playCharacterAppearAnimation(() => {
+          this.#activeEnemyCharacter.playCharacterHealthBarAppearAnimation(
             () => undefined
           );
           this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-            [`wild ${this.#activeEnemyMonster.name} appeared!`],
+            [`Wild ${this.#activeEnemyCharacter.name} appeared!`],
             () => {
               // Wait for text animation to complete and move to next state
               this.#battleStateMachine.setState(
-                BATTLE_STATES.BRING_OUT_MONSTER
+                BATTLE_STATES.BRING_OUT_CHARACTER
               );
             },
             SKIP_BATTLE_ANIMATIONS
@@ -331,15 +331,15 @@ export default class Battle extends Scene {
     });
 
     this.#battleStateMachine.addState({
-      name: BATTLE_STATES.BRING_OUT_MONSTER,
+      name: BATTLE_STATES.BRING_OUT_CHARACTER,
       onEnter: () => {
-        // Wait for player monster to appear on the screen and notify the player about monster
-        this.#activePlayerMonster.playMonsterAppearAnimation(() => {
-          this.#activePlayerMonster.playMonsterHealthBarAppearAnimation(
+        // Wait for player character to appear on the screen and notify the player about character
+        this.#activePlayerCharacter.playCharacterAppearAnimation(() => {
+          this.#activePlayerCharacter.playCharacterHealthBarAppearAnimation(
             () => undefined
           );
           this.#battleMenu.updateInfoPaneMessagesNoInputRequired(
-            `go ${this.#activePlayerMonster.name}!`,
+            `Go ${this.#activePlayerCharacter.name}!`,
             () => {
               // Wait for text animation to complete and move to next state
               this.time.delayedCall(1200, () => {
