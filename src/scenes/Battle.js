@@ -61,14 +61,14 @@ export default class Battle extends Scene {
     console.log(`[${Battle.name}:create] invoked`);
     // Create main background
     const background = new Background(this);
-    background.showForest();
+    background.showMeadow();
 
     // Render out the player and enemy characters
     this.#activeEnemyCharacter = new EnemyBattleCharacter({
       scene: this,
       characterDetails: {
-        name: CHARACTER_ASSET_KEYS.SKELETON,
-        assetKey: CHARACTER_ASSET_KEYS.SKELETON,
+        name: CHARACTER_ASSET_KEYS.FERNBITE,
+        assetKey: CHARACTER_ASSET_KEYS.FERNBITE,
         assetFrame: 0,
         currentHp: 25,
         maxHp: 25,
@@ -275,7 +275,7 @@ export default class Battle extends Scene {
     this.cameras.main.once(
       Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
       () => {
-        this.scene.start(SCENE_KEYS.BATTLE_SCENE);
+        this.scene.start(SCENE_KEYS.WORLD_SCENE);
       }
     );
   }

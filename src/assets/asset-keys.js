@@ -1,5 +1,6 @@
 export const BATTLE_BACKGROUND_ASSET_KEYS = Object.freeze({
   FOREST: 'FOREST',
+  MEADOW: 'MEADOW',
 });
 
 export const CLASSES_ASSET_KEYS = Object.freeze({
@@ -9,6 +10,7 @@ export const CLASSES_ASSET_KEYS = Object.freeze({
 export const CHARACTER_ASSET_KEYS = Object.freeze({
   IGUANIGNITE: 'IGUANIGNITE',
   SKELETON: 'SKELETON',
+  FERNBITE: 'FERNBITE',
 });
 
 export const BATTLE_ASSET_KEYS = Object.freeze({
@@ -44,6 +46,7 @@ export const WORLD_ASSET_KEYS = Object.freeze({
   WORLD_MAIN_LEVEL: 'WORLD_MAIN_LEVEL',
   WORLD_COLLISION: 'WORLD_COLLISION',
   WORLD_FOREGROUND: 'WORLD_FOREGROUND',
+  WORLD_ENCOUNTER_ZONE: 'WORLD_ENCOUNTER_ZONE',
 });
 
 export const CHARACTER_ENTITY_ASSET_KEYS = Object.freeze({
