@@ -29,8 +29,8 @@ export default class PreLoader extends Scene {
 
     // Background Assets
     this.load.image(
-      BATTLE_BACKGROUND_ASSET_KEYS.FOREST,
-      `${dragonOdysseyAssetPath}/battle-backgrounds/forest-background.jpg`
+      BATTLE_BACKGROUND_ASSET_KEYS.MEADOW,
+      `${dragonOdysseyAssetPath}/battle-backgrounds/meadow-background.jpg`
     );
 
     // Battle Assets
@@ -67,8 +67,8 @@ export default class PreLoader extends Scene {
 
     // Characters Assets
     this.load.image(
-      CHARACTER_ASSET_KEYS.SKELETON,
-      `${dragonOdysseyAssetPath}/enemies/skeleton.png`
+      CHARACTER_ASSET_KEYS.FERNBITE,
+      `${dragonOdysseyAssetPath}/enemies/fernbite.png`
     );
 
     this.load.image(
@@ -141,6 +141,10 @@ export default class PreLoader extends Scene {
     this.load.image(
       WORLD_ASSET_KEYS.WORLD_FOREGROUND,
       `${dragonOdysseyAssetPath}/map/level_foreground.png`
+    );
+    this.load.image(
+      WORLD_ASSET_KEYS.WORLD_ENCOUNTER_ZONE,
+      `${dragonOdysseyAssetPath}/map/encounter.png`
     );
 
     // Character Assets

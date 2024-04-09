@@ -29,3 +29,6 @@ export function animateText(scene, target, text, config) {
     delay: config?.delay || 25,
   });
 }
+
+export const CANNOT_READ_SIGN_TEXT = 'I can barely read from here.';
+export const SAMPLE_TEXT = 'Make sure you talk with NPCs for helpful tips!!';

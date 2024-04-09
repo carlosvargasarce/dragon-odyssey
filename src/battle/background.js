@@ -13,15 +13,15 @@ export class Background {
     this.#scene = scene;
 
     this.#backgroundGameObject = this.#scene.add
-      .image(0, 0, BATTLE_BACKGROUND_ASSET_KEYS.FOREST)
+      .image(0, 0, BATTLE_BACKGROUND_ASSET_KEYS.MEADOW)
       .setOrigin(0)
       .setAlpha(0)
       .setScale(0.5);
   }
 
-  showForest() {
+  showMeadow() {
     this.#backgroundGameObject
-      .setTexture(BATTLE_BACKGROUND_ASSET_KEYS.FOREST)
+      .setTexture(BATTLE_BACKGROUND_ASSET_KEYS.MEADOW)
       .setAlpha(1);
   }
 }
