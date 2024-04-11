@@ -1,5 +1,7 @@
 import { exhaustiveGuard } from '../../utils/guard.js';
 import { ATTACK_KEYS } from './attack-keys.js';
+import IceShardFactory from './factories/ice-shard-factory.js';
+import SlashFactory from './factories/slash-factory.js';
 import { IceShard } from './ice-shard.js';
 import { Slash } from './slash.js';
 
@@ -59,14 +61,19 @@ export class AttackManager {
     switch (attack) {
       case ATTACK_KEYS.ICE_SHARD:
         if (!this.#iceShardAttack) {
-          this.#iceShardAttack = new IceShard(this.#scene, { x, y });
+          const iceShardFactory = new IceShardFactory();
+          this.#iceShardAttack = iceShardFactory.createAttack(this.#scene, {
+            x,
+            y,
+          });
         }
         this.#iceShardAttack.gameObject.setPosition(x, y);
         this.#iceShardAttack.playAnimation(callback);
         break;
       case ATTACK_KEYS.SLASH:
         if (!this.#slashAttack) {
-          this.#slashAttack = new Slash(this.#scene, { x, y });
+          const slashFactory = new SlashFactory();
+          this.#slashAttack = slashFactory.createAttack(this.#scene, { x, y });
         }
         this.#slashAttack.gameObject.setPosition(x, y);
         this.#slashAttack.playAnimation(callback);

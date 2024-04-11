@@ -23,6 +23,7 @@ import { exhaustiveGuard } from '../../utils/guard.js';
  * @property {() => void} [spriteGridMovementFinishedCallback]
  * @property {CharacterIdleFrameConfig} idleFrameConfig
  * @property {Phaser.Tilemaps.TilemapLayer} [collisionLayer]
+ * @property {Character[]} [otherCharactersToCheckForCollisionsWith=[]]
  */
 
 export class Character {
@@ -46,6 +47,8 @@ export class Character {
   _origin;
   /** @protected @type {Phaser.Tilemaps.TilemapLayer | undefined} */
   _collisionLayer;
+  /** @protected @type {Character[]} */
+  _otherCharactersToCheckForCollisionsWith;
 
   /**
    *
@@ -66,6 +69,8 @@ export class Character {
     this._idleFrameConfig = config.idleFrameConfig;
     this._origin = config.origin ? { ...config.origin } : { x: 0, y: 0 };
     this._collisionLayer = config.collisionLayer;
+    this._otherCharactersToCheckForCollisionsWith =
+      config.otherCharactersToCheckForCollisionsWith || [];
     this._phaserGameObject = this._scene.add
       .sprite(
         config.position.x,
@@ -103,6 +108,14 @@ export class Character {
     }
 
     this._moveSprite(direction);
+  }
+
+  /**
+   * @param {Character} character
+   * @returns {void}
+   */
+  addCharacterToCheckForCollisionsWith(character) {
+    this._otherCharactersToCheckForCollisionsWith.push(character);
   }
 
   /**
@@ -177,7 +190,10 @@ export class Character {
       this._direction
     );
 
-    return this.#doesPositionCollideWithCollisionLayer(updatedPosition);
+    return (
+      this.#doesPositionCollideWithCollisionLayer(updatedPosition) ||
+      this.#doesPositionCollideWithOtherCharacter(updatedPosition)
+    );
   }
 
   /**
@@ -223,7 +239,7 @@ export class Character {
 
   /**
    *
-   * @param {import('src/types/typedef.js').Coordinate} position
+   * @param {import('../../types/typedef.js').Coordinate} position
    * @returns {boolean}
    */
   #doesPositionCollideWithCollisionLayer(position) {
@@ -235,5 +251,30 @@ export class Character {
     const tile = this._collisionLayer.getTileAtWorldXY(x, y, true);
 
     return tile.index !== -1;
+  }
+
+  /**
+   *
+   * @param {import('../../types/typedef.js').Coordinate} position
+   * @returns {boolean}
+   */
+  #doesPositionCollideWithOtherCharacter(position) {
+    const { x, y } = position;
+
+    if (this._otherCharactersToCheckForCollisionsWith.length === 0) {
+      return false;
+    }
+
+    const collidesWithACharacter =
+      this._otherCharactersToCheckForCollisionsWith.some((character) => {
+        return (
+          (character._targetPosition.x === x &&
+            character._targetPosition.y === y) ||
+          (character._previousTargetPosition.x === x &&
+            character._previousTargetPosition.y === y)
+        );
+      });
+
+    return collidesWithACharacter;
   }
 }

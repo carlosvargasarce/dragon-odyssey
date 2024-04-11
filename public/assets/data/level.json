@@ -740,8 +740,8 @@
                  "type":"entrance",
                  "visible":true,
                  "width":64,
-                 "x":125.142857142857,
-                 "y":257.396825396825
+                 "x":125.143,
+                 "y":257.397
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -839,7 +839,6 @@
                 {
                  "draworder":"topdown",
                  "id":18,
-                 "locked":true,
                  "name":"NPC1",
                  "objects":[
                         {
@@ -861,9 +860,19 @@
                          "name":"npc",
                          "properties":[
                                 {
+                                 "name":"frame",
+                                 "type":"string",
+                                 "value":"1"
+                                }, 
+                                {
                                  "name":"id",
                                  "type":"int",
                                  "value":2
+                                }, 
+                                {
+                                 "name":"messages",
+                                 "type":"string",
+                                 "value":"Woof! Baloo's the name, and adventure's my game.::Ready to sniff out some fun?"
                                 }, 
                                 {
                                  "name":"movement_pattern",
@@ -958,7 +967,6 @@
                 {
                  "draworder":"topdown",
                  "id":20,
-                 "locked":true,
                  "name":"NPC2",
                  "objects":[
                         {
@@ -968,9 +976,19 @@
                          "name":"npc",
                          "properties":[
                                 {
+                                 "name":"frame",
+                                 "type":"string",
+                                 "value":"14"
+                                }, 
+                                {
                                  "name":"id",
                                  "type":"int",
                                  "value":3
+                                }, 
+                                {
+                                 "name":"messages",
+                                 "type":"string",
+                                 "value":"Ah, welcome, traveler. I am Master Eldrin, keeper of wisdom in Havenbrook. What brings you to our humble village?::To dispel darkness, grow stronger with each battle. The key to victory lies in leveling up."
                                 }, 
                                 {
                                  "name":"movement_pattern",

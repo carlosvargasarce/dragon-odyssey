@@ -6,6 +6,7 @@ import { Controls } from '../utils/controls.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { getTargetPositionFromGameObjectPositionAndDirection } from '../utils/grid-utils.js';
 import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text.utils.js';
+import { NPC } from '../world/characters/npc.js';
 import { Player } from '../world/characters/player.js';
 import { DialogUi } from '../world/dialog-ui.js';
 import { SCENE_KEYS } from './scene-keys.js';
@@ -17,6 +18,22 @@ import { SCENE_KEYS } from './scene-keys.js';
  * @property {string} type
  * @property {any} value
  */
+
+const TILED_SIGN_PROPERTY = Object.freeze({
+  MESSAGE: 'message',
+});
+
+const CUSTOM_TILED_TYPES = Object.freeze({
+  NPC: 'npc',
+  NPC_PATH: 'npc_path',
+});
+
+const TILED_NPC_PROPERTY = Object.freeze({
+  MESSAGE: 'is_spawn_point',
+  NPC_PATH: 'movement_pattern',
+  MESSAGES: 'messages',
+  FRAME: 'frame',
+});
 
 export default class World extends Scene {
   /** @type {Player} */
@@ -31,6 +48,10 @@ export default class World extends Scene {
   #signLayer;
   /** @type {DialogUi} */
   #dialogUi;
+  /** @type {NPC[]}*/
+  #npcs;
+  /** @type {NPC | undefined} */
+  #npcPlayerIsInteractingWith;
 
   constructor() {
     super({
@@ -39,7 +60,9 @@ export default class World extends Scene {
   }
 
   init() {
+    console.log(`[${World.name}:init] invoked`);
     this.#wildMonsterEncountered = false;
+    this.#npcPlayerIsInteractingWith = undefined;
   }
 
   create() {
@@ -84,7 +107,6 @@ export default class World extends Scene {
       );
       return;
     }
-    console.log(this.#signLayer);
 
     //Encounter Tiles and Layer
     const encounterTiles = map.addTilesetImage(
@@ -110,6 +132,10 @@ export default class World extends Scene {
 
     this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_BACKGROUND, 0).setOrigin(0);
 
+    //Create NPCS
+    this.#createNPCs(map);
+
+    // Create player
     this.#player = new Player({
       scene: this,
       position: dataManager.store.get(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION),
@@ -120,10 +146,17 @@ export default class World extends Scene {
       spriteGridMovementFinishedCallback: () => {
         this.#handlePlayerMovementUpdate();
       },
+      otherCharactersToCheckForCollisionsWith: this.#npcs,
+    });
+
+    this.cameras.main.startFollow(this.#player.sprite);
+
+    // Update our collisions with npcs
+    this.#npcs.forEach((npc) => {
+      npc.addCharacterToCheckForCollisionsWith(this.#player);
     });
 
     // Create Foreground for Depth
-    this.cameras.main.startFollow(this.#player.sprite);
     this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_FOREGROUND, 0).setOrigin(0);
     this.#controls = new Controls(this);
 
@@ -155,6 +188,9 @@ export default class World extends Scene {
     }
 
     this.#player.update(time);
+    this.#npcs.forEach((npc) => {
+      npc.update(time);
+    });
   }
 
   #handlePlayerInteraction() {
@@ -164,6 +200,12 @@ export default class World extends Scene {
 
     if (this.#dialogUi.isVisible && !this.#dialogUi.moreMessagesToShow) {
       this.#dialogUi.hideDialogModal();
+
+      if (this.#npcPlayerIsInteractingWith) {
+        this.#npcPlayerIsInteractingWith.isTalkingToPlayer = false;
+        this.#npcPlayerIsInteractingWith = undefined;
+      }
+
       return;
     }
 
@@ -196,7 +238,9 @@ export default class World extends Scene {
       /** @type {TiledObjectProperty[]} */
       const props = nearbySign.properties;
       /** @type {string} */
-      const msg = props.find((prop) => prop.name === 'message')?.value;
+      const msg = props.find(
+        (prop) => prop.name === TILED_SIGN_PROPERTY.MESSAGE
+      )?.value;
 
       const usePlaceholderText = this.#player.direction !== DIRECTION.UP;
       let textToShow = CANNOT_READ_SIGN_TEXT;
@@ -208,6 +252,19 @@ export default class World extends Scene {
       this.#dialogUi.showDialogModal([textToShow]);
 
       return;
+    }
+
+    const nearbyNpc = this.#npcs.find((npc) => {
+      return (
+        npc.sprite.x === targetPosition.x && npc.sprite.y === targetPosition.y
+      );
+    });
+
+    if (nearbyNpc) {
+      nearbyNpc.facePlayer(this.#player.direction);
+      nearbyNpc.isTalkingToPlayer = true;
+      this.#npcPlayerIsInteractingWith = nearbyNpc;
+      this.#dialogUi.showDialogModal(nearbyNpc.messages);
     }
   }
 
@@ -261,5 +318,60 @@ export default class World extends Scene {
 
   #isPlayerInputLocked() {
     return this.#dialogUi.isVisible;
+  }
+
+  /**
+   *
+   * @param {Phaser.Tilemaps.Tilemap} map
+   * @returns {void}
+   */
+  #createNPCs(map) {
+    this.#npcs = [];
+
+    const npcLayers = map
+      .getObjectLayerNames()
+      .filter((layerName) => layerName.includes('NPC'));
+
+    npcLayers.forEach((layerName) => {
+      const layer = map.getObjectLayer(layerName);
+
+      const npcObject = layer.objects.find((obj) => {
+        return obj.type === CUSTOM_TILED_TYPES.NPC;
+      });
+
+      if (
+        !npcObject ||
+        npcObject.x === undefined ||
+        npcObject.y === undefined
+      ) {
+        return;
+      }
+
+      /** @type {string} */
+      const npcFrame =
+        /** @type {TiledObjectProperty[]} */
+        npcObject.properties.find(
+          (property) => property.name === TILED_NPC_PROPERTY.FRAME
+        )?.value || '0';
+
+      /** @type {string} */
+      const npcMessagesString =
+        /** @type {TiledObjectProperty[]} */
+        npcObject.properties.find(
+          (property) => property.name === TILED_NPC_PROPERTY.MESSAGES
+        )?.value || '';
+
+      const npcMessages = npcMessagesString.split('::');
+
+      const npc = new NPC({
+        scene: this,
+        position: { x: npcObject.x, y: npcObject.y - TILE_SIZE },
+        direction: DIRECTION.DOWN,
+        frame: parseInt(npcFrame, 10),
+        messages: npcMessages,
+      });
+
+      this.#npcs.push(npc);
+    });
   }
 }
