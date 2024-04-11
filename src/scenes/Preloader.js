@@ -158,11 +158,11 @@ export default class PreLoader extends Scene {
     );
 
     this.load.spritesheet(
-      CHARACTER_ENTITY_ASSET_KEYS.PLAYER,
+      CHARACTER_ENTITY_ASSET_KEYS.NPC,
       `${dragonOdysseyAssetPath}/characters/characters.png`,
       {
-        frameWidth: 16,
-        frameHeight: 16,
+        frameWidth: 64,
+        frameHeight: 64,
       }
     );
   }
