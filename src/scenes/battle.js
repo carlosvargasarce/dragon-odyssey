@@ -13,8 +13,9 @@ import { EnemyBattleCharacter } from '../battle/characters/enemy-battle-characte
 import { PlayerBattleCharacter } from '../battle/characters/player-battle-character.js';
 import { BattleMenu } from '../battle/ui/menu/battle-menu.js';
 import { DIRECTION } from '../common/direction.js';
-import { SKIP_BATTLE_ANIMATIONS } from '../config.js';
+import { BATTLE_SCENE_OPTIONS } from '../common/options.js';
 import { Controls } from '../utils/controls.js';
+import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { createSceneTransition } from '../utils/scene-transition.js';
 import { StateMachine } from '../utils/state-machine.js';
 import { SCENE_KEYS } from './scene-keys.js';
@@ -31,6 +32,13 @@ const BATTLE_STATES = Object.freeze({
   FLEE_ATTEMPT: ' FLEE_ATTEMPT',
 });
 
+/**
+ * @typedef BattleSceneData
+ * @type {object}
+ * @property {import('../types/typedef.js').Character[]} playerCharacters
+ * @property {import('../types/typedef.js').Character[]} enemyCharacters
+ */
+
 export default class Battle extends Scene {
   /** @type {BattleMenu} */
   #battleMenu;
@@ -46,6 +54,16 @@ export default class Battle extends Scene {
   #battleStateMachine;
   /** @type  {AttackManager}} */
   #attackManager;
+  /** @type {boolean} */
+  #skipAnimations;
+  /** @type {number} */
+  #activeEnemyAttackIndex;
+  /** @type {BattleSceneData} */
+  #sceneData;
+  /** @type {number} */
+  #activePlayerMonsterPartyIndex;
+  /** @type {boolean} */
+  #playerKnockedOut;
 
   constructor() {
     super({
@@ -55,6 +73,20 @@ export default class Battle extends Scene {
 
   init() {
     this.#activePlayerAttackIndex = -1;
+
+    /** @type {import('../common/options.js').BattleSceneMenuOptions | undefined} */
+    const chosenBattleSceneOption = dataManager.store.get(
+      DATA_MANAGER_STORE_KEYS.OPTIONS_BATTLE_SCENE_ANIMATIONS
+    );
+    if (
+      chosenBattleSceneOption === undefined ||
+      chosenBattleSceneOption === BATTLE_SCENE_OPTIONS.ON
+    ) {
+      this.#skipAnimations = false;
+      return;
+    }
+    this.#skipAnimations = true;
+    this.#playerKnockedOut = false;
   }
 
   create() {
@@ -63,8 +95,7 @@ export default class Battle extends Scene {
     const background = new Background(this);
     background.showMeadow();
 
-    // Render out the player and enemy characters
-    this.#activeEnemyCharacter = new EnemyBattleCharacter({
+    let enemyPrototype = new EnemyBattleCharacter({
       scene: this,
       characterDetails: {
         name: CHARACTER_ASSET_KEYS.FERNBITE,
@@ -76,8 +107,13 @@ export default class Battle extends Scene {
         baseAttack: 15,
         currentLevel: 5,
       },
-      skipBattleAnimation: SKIP_BATTLE_ANIMATIONS,
+      skipBattleAnimation: false,
     });
+
+    // Render out the player and enemy characters
+    //Clone is being use for enemies using prototype pattern, in the future if we want to spawn
+    //multiple enemies we could stick with this approach
+    this.#activeEnemyCharacter = enemyPrototype.clone();
 
     this.#activePlayerCharacter = new PlayerBattleCharacter({
       scene: this,
@@ -91,20 +127,25 @@ export default class Battle extends Scene {
         baseAttack: 5,
         currentLevel: 5,
       },
-      skipBattleAnimation: SKIP_BATTLE_ANIMATIONS,
+      skipBattleAnimation: this.#skipAnimations,
     });
 
     // Render out the main info and sub info panes
-    this.#battleMenu = new BattleMenu(this, this.#activePlayerCharacter);
+    this.#battleMenu = new BattleMenu(
+      this,
+      this.#activePlayerCharacter,
+      this.#skipAnimations
+    );
     this.#createBattleStateMachine();
-    this.#attackManager = new AttackManager(this, SKIP_BATTLE_ANIMATIONS);
+    this.#attackManager = new AttackManager(this, this.#skipAnimations);
 
     // Add Cursor keys
     this.#controls = new Controls(this);
+    this.#controls.lockInput = true;
 
-    this.escapeKey = this.input.keyboard.addKey(
-      Phaser.Input.Keyboard.KeyCodes.ESC
-    );
+    // this.escapeKey = this.input.keyboard.addKey(
+    //   Phaser.Input.Keyboard.KeyCodes.ESC
+    // );
     // this.enterKey = this.input.keyboard.addKey(
     //   Phaser.Input.Keyboard.KeyCodes.ENTER
     // );
@@ -112,9 +153,14 @@ export default class Battle extends Scene {
 
   update() {
     this.#battleStateMachine.update();
+
+    if (this.#controls.isInputLocked) {
+      return;
+    }
+
     const wasSpaceKeyPressed = this.#controls.wasSpaceKeyPressed();
     // const wasEnterKeyPressed = Phaser.Input.Keyboard.JustDown(this.enterKey);
-    const wasEscapeKeyPressed = Phaser.Input.Keyboard.JustDown(this.escapeKey);
+    // const wasEscapeKeyPressed = Phaser.Input.Keyboard.JustDown(this.escapeKey);
 
     // Limit input based on the current battle state we are in
     // If we are not in the right battle state, return early and do not process input
@@ -159,7 +205,7 @@ export default class Battle extends Scene {
       this.#battleStateMachine.setState(BATTLE_STATES.ENEMY_INPUT);
     }
 
-    if (wasEscapeKeyPressed) {
+    if (this.#controls.wasBackKeyPressed()) {
       this.#battleMenu.handlePlayerInput('CANCEL');
       return;
     }
@@ -194,8 +240,7 @@ export default class Battle extends Scene {
             }
           );
         });
-      },
-      SKIP_BATTLE_ANIMATIONS
+      }
     );
   }
 
@@ -228,8 +273,7 @@ export default class Battle extends Scene {
             }
           );
         });
-      },
-      SKIP_BATTLE_ANIMATIONS
+      }
     );
   }
 
@@ -243,8 +287,7 @@ export default class Battle extends Scene {
           ],
           () => {
             this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
-          },
-          SKIP_BATTLE_ANIMATIONS
+          }
         );
       });
 
@@ -260,8 +303,7 @@ export default class Battle extends Scene {
           ],
           () => {
             this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
-          },
-          SKIP_BATTLE_ANIMATIONS
+          }
         );
       });
       return;
@@ -288,7 +330,7 @@ export default class Battle extends Scene {
       onEnter: () => {
         // Wait for any scene setup and transitions to complete
         createSceneTransition(this, {
-          skipSceneTransition: SKIP_BATTLE_ANIMATIONS,
+          skipSceneTransition: this.#skipAnimations,
           callback: () => {
             this.#battleStateMachine.setState(BATTLE_STATES.PRE_BATTLE_INFO);
           },
@@ -304,6 +346,7 @@ export default class Battle extends Scene {
           this.#activeEnemyCharacter.playCharacterHealthBarAppearAnimation(
             () => undefined
           );
+          this.#controls.lockInput = false;
           this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
             [`Wild ${this.#activeEnemyCharacter.name} appeared!`],
             () => {
@@ -311,8 +354,7 @@ export default class Battle extends Scene {
               this.#battleStateMachine.setState(
                 BATTLE_STATES.BRING_OUT_CHARACTER
               );
-            },
-            SKIP_BATTLE_ANIMATIONS
+            }
           );
         });
       },
@@ -333,8 +375,7 @@ export default class Battle extends Scene {
               this.time.delayedCall(1200, () => {
                 this.#battleStateMachine.setState(BATTLE_STATES.PLAYER_INPUT);
               });
-            },
-            SKIP_BATTLE_ANIMATIONS
+            }
           );
         });
       },
@@ -386,8 +427,7 @@ export default class Battle extends Scene {
           [`You got away safely!`],
           () => {
             this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
-          },
-          SKIP_BATTLE_ANIMATIONS
+          }
         );
       },
     });

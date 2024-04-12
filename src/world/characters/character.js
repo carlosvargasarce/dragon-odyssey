@@ -15,15 +15,17 @@ import { exhaustiveGuard } from '../../utils/guard.js';
 /**
  * @typedef CharacterConfig
  * @type {object}
- * @property {Phaser.Scene} scene
- * @property {string} assetKey
- * @property {import("src/types/typedef.js").Coordinate} [origin={ x:0, y:0 }]
- * @property {import("src/types/typedef.js").Coordinate} position
- * @property {import('../../common/direction.js').Direction} direction
- * @property {() => void} [spriteGridMovementFinishedCallback]
+ * @property {Phaser.Scene} scene the Phaser 3 Scene the battle menu will be added to
+ * @property {string} assetKey the name of the asset key that should be used for this character
+ * @property {import('../../types/typedef.js').Coordinate} [origin={ x:0, y:0 }]
+ * @property {import('../../types/typedef.js').Coordinate} position the starting position of the character
+ * @property {import('../../common/direction.js').Direction} direction the direction the character is currently facing
+ * @property {() => void} [spriteGridMovementFinishedCallback] an optional callback that will be called after each step of the grid movement is complete
  * @property {CharacterIdleFrameConfig} idleFrameConfig
  * @property {Phaser.Tilemaps.TilemapLayer} [collisionLayer]
  * @property {Character[]} [otherCharactersToCheckForCollisionsWith=[]]
+ * @property {() => void} [spriteChangedDirectionCallback]
+ * @property {{position: import('../../types/typedef.js').Coordinate}[]} [objectsToCheckForCollisionsWith]
  */
 
 export class Character {
@@ -49,6 +51,10 @@ export class Character {
   _collisionLayer;
   /** @protected @type {Character[]} */
   _otherCharactersToCheckForCollisionsWith;
+  /** @protected @type {() => void | undefined} */
+  _spriteChangedDirectionCallback;
+  /** @protected @type {{position: import('../../types/typedef.js').Coordinate}[]} */
+  _objectsToCheckForCollisionsWith;
 
   /**
    *
@@ -81,6 +87,10 @@ export class Character {
       .setOrigin(this._origin.x, this._origin.y);
     this._spriteGridMovementFinishedCallback =
       config.spriteGridMovementFinishedCallback;
+    this._spriteChangedDirectionCallback =
+      config.spriteChangedDirectionCallback;
+    this._objectsToCheckForCollisionsWith =
+      config.objectsToCheckForCollisionsWith || [];
   }
 
   /** @type {Phaser.GameObjects.Sprite} */
@@ -164,7 +174,14 @@ export class Character {
    * @returns {void}
    */
   _moveSprite(direction) {
+    const changedDirection = this._direction !== direction;
     this._direction = direction;
+
+    if (changedDirection) {
+      if (this._spriteChangedDirectionCallback !== undefined) {
+        this._spriteChangedDirectionCallback();
+      }
+    }
 
     if (this._isBlockingTile()) {
       return;

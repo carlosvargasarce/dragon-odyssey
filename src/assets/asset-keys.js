@@ -28,6 +28,10 @@ export const HEALTH_BAR_ASSET_KEYS = Object.freeze({
 
 export const UI_ASSET_KEYS = Object.freeze({
   CURSOR: 'CURSOR',
+  CURSOR_WHITE: 'CURSOR_WHITE',
+  MENU_BACKGROUND: 'MENU_BACKGROUND',
+  MENU_BACKGROUND_GREEN: 'MENU_BACKGROUND_GREEN',
+  MENU_BACKGROUND_BLUE: 'MENU_BACKGROUND_BLUE',
 });
 
 export const DATA_ASSET_KEYS = Object.freeze({
@@ -52,4 +56,14 @@ export const WORLD_ASSET_KEYS = Object.freeze({
 export const CHARACTER_ENTITY_ASSET_KEYS = Object.freeze({
   PLAYER: 'PLAYER',
   NPC: 'NPC',
+});
+
+export const TITLE_ASSET_KEYS = Object.freeze({
+  BACKGROUND: 'BACKGROUND',
+  TITLE: 'TITLE',
+  PANEL: 'PANEL',
+});
+
+export const OPTIONS_ASSET_KEYS = Object.freeze({
+  BACKGROUNDS: 'BACKGROUNDS',
 });

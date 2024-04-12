@@ -23,10 +23,9 @@ export class Healthbar {
   #rightShadowCap;
 
   /**
-   *
-   * @param {Phaser.Scene} scene the Phaser 3 Scene the healthbar will be added to
-   * @param {number} x
-   * @param {number} y
+   * @param {Phaser.Scene} scene the Phaser 3 Scene the health bar will be added to
+   * @param {number} x the x position to place the health bar container
+   * @param {number} y the y position to place the health bar container
    */
   constructor(scene, x, y) {
     this.#scene = scene;
@@ -117,9 +116,8 @@ export class Healthbar {
   }
 
   /**
-   *
    * @param {number} [percent=1] a number between 0 and 1 that is used for setting how filled the health bar is
-   *
+   * @returns {void}
    */
   #setMeterPercentage(percent = 1) {
     const width = this.#fullWidth * percent;
@@ -128,13 +126,21 @@ export class Healthbar {
     this.#rightCap.x = this.#middle.x + this.#middle.displayWidth;
   }
 
+  #updateHealthBarGameObjects() {
+    this.#rightCap.x = this.#middle.x + this.#middle.displayWidth;
+    const isVisible = this.#middle.displayWidth > 0;
+    this.#leftCap.visible = isVisible;
+    this.#middle.visible = isVisible;
+    this.#rightCap.visible = isVisible;
+  }
+
   /**
-   *
    * @param {number} [percent=1] a number between 0 and 1 that is used for setting how filled the health bar is
-   * @param {Object} [options]
-   * @param {number} [options.duration=100]
-   * @param {() => void} [options.callback]
-   *
+   * @param {object} [options] optional configuration options that can be provided for the animation
+   * @param {number} [options.duration=1000] the duration of the health bar animation
+   * @param {() => void} [options.callback] an optional callback that will be called when the animation is complete
+   * @param {boolean} [options.skipBattleAnimations=false] determines if we skip the health bar animation
+   * @returns {void}
    */
   setMeterPercentageAnimated(percent, options) {
     const width = this.#fullWidth * percent;
@@ -142,14 +148,10 @@ export class Healthbar {
     this.#scene.tweens.add({
       targets: this.#middle,
       displayWidth: width,
-      duration: options?.duration || 1000,
+      duration: options?.duration || options?.duration === 0 ? 0 : 1000,
       ease: Phaser.Math.Easing.Sine.Out,
       onUpdate: () => {
-        this.#rightCap.x = this.#middle.x + this.#middle.displayWidth;
-        const isVisible = this.#middle.displayWidth > 0;
-        this.#leftCap.visible = isVisible;
-        this.#middle.visible = isVisible;
-        this.#rightCap.visible = isVisible;
+        this.#updateHealthBarGameObjects();
       },
       onComplete: options?.callback,
     });
