@@ -1,6 +1,7 @@
 import { UI_ASSET_KEYS } from '../assets/asset-keys.js';
 import { LATO_FONT_NAME } from '../assets/font-keys.js';
 import { dataManager } from '../utils/data-manager.js';
+import SpriteFacade from '../utils/spriteFacade.js';
 import { CANNOT_READ_SIGN_TEXT, animateText } from '../utils/text.utils.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
@@ -125,11 +126,12 @@ export class DialogUi {
   #createPlayerInputCursor() {
     const y = this.#height - 32;
 
-    this.#userInputCursor = this.#scene.add.image(
-      this.#width - 35,
-      y,
-      UI_ASSET_KEYS.CURSOR
+    this.#userInputCursor = SpriteFacade.createSprite(
+      this.#scene,
+      { x: this.#width - 35, y: y },
+      { assetKey: UI_ASSET_KEYS.CURSOR }
     );
+
     this.#userInputCursor.setAngle(90).setScale(1.2, 1);
 
     this.#userInputCursorTween = this.#scene.add.tween({

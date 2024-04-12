@@ -7,6 +7,8 @@ export class Controls {
   #cursorKeys;
   /** @type {boolean} */
   #lockPlayerInput;
+  /** @type {Phaser.Input.Keyboard.Key | undefined} */
+  #enterKey;
 
   /**
    * @param {Phaser.Scene} scene
@@ -15,6 +17,9 @@ export class Controls {
   constructor(scene) {
     this.#scene = scene;
     this.#cursorKeys = this.#scene.input.keyboard?.createCursorKeys();
+    this.#enterKey = this.#scene.input.keyboard?.addKey(
+      Phaser.Input.Keyboard.KeyCodes.ENTER
+    );
     this.#lockPlayerInput = false;
   }
 
@@ -26,6 +31,14 @@ export class Controls {
   /** @param {boolean} val the value that will be assigned */
   set lockInput(val) {
     this.#lockPlayerInput = val;
+  }
+
+  /** @returns {boolean} */
+  wasEnterKeyPressed() {
+    if (this.#enterKey === undefined) {
+      return false;
+    }
+    return Phaser.Input.Keyboard.JustDown(this.#enterKey);
   }
 
   /** @returns {boolean} */

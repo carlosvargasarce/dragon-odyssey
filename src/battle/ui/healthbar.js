@@ -1,4 +1,5 @@
 import { HEALTH_BAR_ASSET_KEYS } from '../../assets/asset-keys.js';
+import SpriteFacade from '../../utils/spriteFacade.js';
 
 export class Healthbar {
   /** @type {Phaser.Scene} */
@@ -49,28 +50,29 @@ export class Healthbar {
    *
    */
   #createHealthBarShadowImages(x, y) {
-    this.#leftShadowCap = this.#scene.add
-      .image(x, y, HEALTH_BAR_ASSET_KEYS.LEFT_CAP_SHADOW)
+    this.#leftShadowCap = SpriteFacade.createSprite(
+      this.#scene,
+      { x: x, y: y },
+      { assetKey: HEALTH_BAR_ASSET_KEYS.LEFT_CAP_SHADOW }
+    )
       .setOrigin(0, 0.5)
       .setScale(1, this.#scaleY);
 
-    this.#middleShadow = this.#scene.add
-      .image(
-        this.#leftShadowCap.x + this.#leftShadowCap.width,
-        y,
-        HEALTH_BAR_ASSET_KEYS.MIDDLE_SHADOW
-      )
+    this.#middleShadow = SpriteFacade.createSprite(
+      this.#scene,
+      { x: this.#leftShadowCap.x + this.#leftShadowCap.width, y: y },
+      { assetKey: HEALTH_BAR_ASSET_KEYS.MIDDLE_SHADOW }
+    )
       .setOrigin(0, 0.5)
       .setScale(1, this.#scaleY);
 
     this.#middleShadow.displayWidth = this.#fullWidth;
 
-    this.#rightShadowCap = this.#scene.add
-      .image(
-        this.#middleShadow.x + this.#middleShadow.displayWidth,
-        y,
-        HEALTH_BAR_ASSET_KEYS.RIGHT_CAP_SHADOW
-      )
+    this.#rightShadowCap = SpriteFacade.createSprite(
+      this.#scene,
+      { x: this.#middleShadow.x + this.#middleShadow.displayWidth, y: y },
+      { assetKey: HEALTH_BAR_ASSET_KEYS.RIGHT_CAP_SHADOW }
+    )
       .setOrigin(0, 0.5)
       .setScale(1, this.#scaleY);
 
@@ -89,26 +91,27 @@ export class Healthbar {
    *
    */
   #createHealthBarImages(x, y) {
-    this.#leftCap = this.#scene.add
-      .image(x, y, HEALTH_BAR_ASSET_KEYS.LEFT_CAP)
+    this.#leftCap = SpriteFacade.createSprite(
+      this.#scene,
+      { x: x, y: y },
+      { assetKey: HEALTH_BAR_ASSET_KEYS.LEFT_CAP }
+    )
       .setOrigin(0, 0.5)
       .setScale(1, this.#scaleY);
 
-    this.#middle = this.#scene.add
-      .image(
-        this.#leftCap.x + this.#leftCap.width,
-        y,
-        HEALTH_BAR_ASSET_KEYS.MIDDLE
-      )
+    this.#middle = SpriteFacade.createSprite(
+      this.#scene,
+      { x: this.#leftCap.x + this.#leftCap.width, y: y },
+      { assetKey: HEALTH_BAR_ASSET_KEYS.MIDDLE }
+    )
       .setOrigin(0, 0.5)
       .setScale(1, this.#scaleY);
 
-    this.#rightCap = this.#scene.add
-      .image(
-        this.#middle.x + this.#middle.displayWidth,
-        y,
-        HEALTH_BAR_ASSET_KEYS.RIGHT_CAP
-      )
+    this.#rightCap = SpriteFacade.createSprite(
+      this.#scene,
+      { x: this.#middle.x + this.#middle.displayWidth, y: y },
+      { assetKey: HEALTH_BAR_ASSET_KEYS.RIGHT_CAP }
+    )
       .setOrigin(0, 0.5)
       .setScale(1, this.#scaleY);
 

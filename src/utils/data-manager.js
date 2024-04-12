@@ -25,6 +25,7 @@ const LOCAL_STORAGE_KEY = 'DRAGON_ODYSSEY_DATA';
  * @property {import('../common/options.js').SoundMenuOptions} options.sound
  * @property {import('../common/options.js').VolumeMenuOptions} options.volume
  * @property {import('../common/options.js').MenuColorOptions} options.menuColor
+ * @property {boolean} gameStarted
  *
  */
 
@@ -45,6 +46,7 @@ const initialState = {
     volume: 4,
     menuColor: 0,
   },
+  gameStarted: false,
 };
 
 export const DATA_MANAGER_STORE_KEYS = Object.freeze({
@@ -139,6 +141,22 @@ class DataManager extends Phaser.Events.EventEmitter {
   }
 
   /**
+   * @param {Phaser.Scene} scene
+   * @returns {void}
+   */
+  startNewGame(scene) {
+    // get existing data before resetting all of the data, so we can persist options data
+    const existingData = { ...this.#dataManagerDataToGlobalStateObject() };
+    existingData.player.position = { ...initialState.player.position };
+    existingData.player.direction = initialState.player.direction;
+    existingData.gameStarted = initialState.gameStarted;
+
+    this.#store.reset();
+    this.#updateDataManager(existingData);
+    this.saveData();
+  }
+
+  /**
    * @returns {number}
    */
   getAnimatedTextSpeed() {
@@ -178,6 +196,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       [DATA_MANAGER_STORE_KEYS.OPTIONS_SOUND]: data.options.sound,
       [DATA_MANAGER_STORE_KEYS.OPTIONS_VOLUME]: data.options.volume,
       [DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR]: data.options.menuColor,
+      [DATA_MANAGER_STORE_KEYS.GAME_STARTED]: data.gameStarted,
     });
   }
 
@@ -205,6 +224,7 @@ class DataManager extends Phaser.Events.EventEmitter {
         volume: this.#store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_VOLUME),
         menuColor: this.#store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR),
       },
+      gameStarted: this.#store.get(DATA_MANAGER_STORE_KEYS.GAME_STARTED),
     };
   }
 }
