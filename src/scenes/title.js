@@ -3,6 +3,7 @@ import { TITLE_ASSET_KEYS, UI_ASSET_KEYS } from '../assets/asset-keys.js';
 import { LATO_FONT_NAME } from '../assets/font-keys.js';
 import { DIRECTION } from '../common/direction.js';
 import { Controls } from '../utils/controls.js';
+import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { NineSlice } from '../utils/nine-slice.js';
 import SpriteFacade from '../utils/spriteFacade.js';
@@ -63,7 +64,12 @@ export default class TitleScene extends Scene {
     console.log(`[${TitleScene.name}:create] invoked`);
 
     this.#selectedMenuOption = MAIN_MENU_OPTIONS.NEW_GAME;
-    this.#isContinueButtonEnabled = false;
+    console.log(
+      'JAJAJ',
+      dataManager.store.get(DATA_MANAGER_STORE_KEYS.GAME_STARTED)
+    );
+    this.#isContinueButtonEnabled =
+      dataManager.store.get(DATA_MANAGER_STORE_KEYS.GAME_STARTED) || false;
 
     SpriteFacade.createSprite(
       this,
@@ -137,21 +143,16 @@ export default class TitleScene extends Scene {
     this.cameras.main.once(
       Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
       () => {
-        if (this.#selectedMenuOption === MAIN_MENU_OPTIONS.NEW_GAME) {
-          // TODO: enhance with logic to reset game once we implement saving/loading data
-          this.scene.start(SCENE_KEYS.WORLD_SCENE);
-          return;
-        }
-
-        if (this.#selectedMenuOption === MAIN_MENU_OPTIONS.CONTINUE) {
-          this.scene.start(SCENE_KEYS.WORLD_SCENE);
-          return;
-        }
-
         if (this.#selectedMenuOption === MAIN_MENU_OPTIONS.OPTIONS) {
           this.scene.start(SCENE_KEYS.OPTIONS_SCENE);
           return;
         }
+
+        if (this.#selectedMenuOption === MAIN_MENU_OPTIONS.NEW_GAME) {
+          dataManager.startNewGame();
+        }
+
+        this.scene.start(SCENE_KEYS.WORLD_SCENE);
       }
     );
 

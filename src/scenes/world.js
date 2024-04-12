@@ -10,6 +10,7 @@ import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text.utils.js';
 import { NPC } from '../world/characters/npc.js';
 import { Player } from '../world/characters/player.js';
 import { DialogUi } from '../world/dialog-ui.js';
+import { Menu } from '../world/menu/menu.js';
 import { SCENE_KEYS } from './scene-keys.js';
 
 /**
@@ -30,7 +31,7 @@ const CUSTOM_TILED_TYPES = Object.freeze({
 });
 
 const TILED_NPC_PROPERTY = Object.freeze({
-  MESSAGE: 'is_spawn_point',
+  IS_SPAWN_POINT: 'is_spawn_point',
   MOVEMENT_PATTERN: 'movement_pattern',
   MESSAGES: 'messages',
   FRAME: 'frame',
@@ -49,10 +50,12 @@ export default class WorldScene extends Scene {
   #signLayer;
   /** @type {DialogUi} */
   #dialogUi;
-  /** @type {NPC[]}*/
+  /** @type {NPC[]} */
   #npcs;
   /** @type {NPC | undefined} */
   #npcPlayerIsInteractingWith;
+  /** @type {Menu} */
+  #menu;
 
   constructor() {
     super({
@@ -67,7 +70,7 @@ export default class WorldScene extends Scene {
   }
 
   create() {
-    console.log(`[${WorldScene.name}:created] invoked`);
+    console.log(`[${WorldScene.name}:create] invoked`);
 
     const x = 6 * TILE_SIZE;
     const y = 22 * TILE_SIZE;
@@ -176,7 +179,11 @@ export default class WorldScene extends Scene {
     // Create Dialog UI
     this.#dialogUi = new DialogUi(this, 1280);
 
+    // Create menu
+    this.#menu = new Menu(this);
+
     this.cameras.main.fadeIn(1000, 0, 0, 0);
+    dataManager.store.set(DATA_MANAGER_STORE_KEYS.GAME_STARTED, true);
   }
 
   /**
@@ -190,17 +197,81 @@ export default class WorldScene extends Scene {
       return;
     }
 
-    const selectedDirection = this.#controls.getDirectionKeyPressedDown();
-
-    if (selectedDirection !== DIRECTION.NONE && !this.#isPlayerInputLocked()) {
-      this.#player.moveCharacter(selectedDirection);
+    const wasSpaceKeyPressed = this.#controls.wasSpaceKeyPressed();
+    const selectedDirectionHeldDown =
+      this.#controls.getDirectionKeyPressedDown();
+    const selectedDirectionPressedOnce =
+      this.#controls.getDirectionKeyJustPressed();
+    if (
+      selectedDirectionHeldDown !== DIRECTION.NONE &&
+      !this.#isPlayerInputLocked()
+    ) {
+      this.#player.moveCharacter(selectedDirectionHeldDown);
     }
 
-    if (this.#controls.wasSpaceKeyPressed() && !this.#player.isMoving) {
+    if (wasSpaceKeyPressed && !this.#player.isMoving && !this.#menu.isVisible) {
       this.#handlePlayerInteraction();
     }
 
+    if (this.#controls.wasEnterKeyPressed() && !this.#player.isMoving) {
+      if (this.#dialogUi.isVisible) {
+        return;
+      }
+
+      if (this.#menu.isVisible) {
+        this.#menu.hide();
+        return;
+      }
+
+      this.#menu.show();
+    }
+
+    if (this.#menu.isVisible) {
+      if (selectedDirectionPressedOnce !== DIRECTION.NONE) {
+        this.#menu.handlePlayerInput(selectedDirectionPressedOnce);
+      }
+
+      if (wasSpaceKeyPressed) {
+        this.#menu.handlePlayerInput('OK');
+
+        if (this.#menu.selectedMenuOption === 'SAVE') {
+          this.#menu.hide();
+          dataManager.saveData();
+          this.#dialogUi.showDialogModal(['Game progress has been saved!']);
+        }
+
+        // if (this.#menu.selectedMenuOption === 'MONSTERS') {
+        //   // pause this scene and launch the monster party scene
+        //   /** @type {import('./monster-party-scene.js').MonsterPartySceneData} */
+        //   const sceneDataToPass = {
+        //     previousSceneName: SCENE_KEYS.WORLD_SCENE,
+        //   };
+        //   this.scene.launch(SCENE_KEYS.MONSTER_PARTY_SCENE, sceneDataToPass);
+        //   this.scene.pause(SCENE_KEYS.WORLD_SCENE);
+        // }
+
+        // if (this.#menu.selectedMenuOption === 'BAG') {
+        //   // pause this scene and launch the inventory scene
+        //   /** @type {import('./inventory-scene.js').InventorySceneData} */
+        //   const sceneDataToPass = {
+        //     previousSceneName: SCENE_KEYS.WORLD_SCENE,
+        //   };
+        //   this.scene.launch(SCENE_KEYS.INVENTORY_SCENE, sceneDataToPass);
+        //   this.scene.pause(SCENE_KEYS.WORLD_SCENE);
+        // }
+
+        if (this.#menu.selectedMenuOption === 'EXIT') {
+          this.#menu.hide();
+        }
+      }
+
+      if (this.#controls.wasBackKeyPressed()) {
+        this.#menu.hide();
+      }
+    }
+
     this.#player.update(time);
+
     this.#npcs.forEach((npc) => {
       npc.update(time);
     });
@@ -264,7 +335,7 @@ export default class WorldScene extends Scene {
 
       this.#dialogUi.showDialogModal([textToShow]);
 
-      return;
+      return false;
     }
 
     const nearbyNpc = this.#npcs.find((npc) => {
@@ -326,7 +397,11 @@ export default class WorldScene extends Scene {
   }
 
   #isPlayerInputLocked() {
-    return this.#dialogUi.isVisible;
+    return (
+      this.#controls.isInputLocked ||
+      this.#dialogUi.isVisible ||
+      this.#menu.isVisible
+    );
   }
 
   /**
