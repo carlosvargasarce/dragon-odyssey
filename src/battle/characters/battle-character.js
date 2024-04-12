@@ -16,7 +16,7 @@ export class BattleCharacter {
   _currentHealth;
   /**@protected @type {number}*/
   _maxHealth;
-  /**@protected @type {import('../../types/typedef.js').Attack}*/
+  /**@protected @type {import('../../types/typedef.js').Attack[]}*/
   _characterAttacks;
   /**@protected @type {Phaser.GameObjects.Container}*/
   _phaserHealthBarGameContainer;
@@ -49,6 +49,13 @@ export class BattleCharacter {
       .setAlpha(0);
 
     this.#createHealthBarComponents(config.scaleHealthBarBackgroundImageByY);
+
+    this._healthBar.setMeterPercentageAnimated(
+      this._currentHealth / this._maxHealth,
+      {
+        skipBattleAnimations: true,
+      }
+    );
 
     this._characterDetails.attackIds.forEach((attackId) => {
       const characterAttack = DataUtils.getCharacterAttack(
@@ -119,10 +126,8 @@ export class BattleCharacter {
    * @param {() => void} callback
    * @returns {void}
    */
-  playCharacterHeakthBarAppearAnimation(callback) {
-    throw new Error(
-      'playCharacterHeakthBarAppearAnimation is not implemented.'
-    );
+  playCharacterHealthBarAppearAnimation(callback) {
+    throw new Error('playCharacterHeathBarAppearAnimation is not implemented.');
   }
 
   /**

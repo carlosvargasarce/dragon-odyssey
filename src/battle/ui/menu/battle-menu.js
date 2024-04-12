@@ -1,6 +1,6 @@
 import { UI_ASSET_KEYS } from '../../../assets/asset-keys.js';
 import { DIRECTION } from '../../../common/direction.js';
-import { SKIP_BATTLE_ANIMATIONS } from '../../../config.js';
+import { dataManager } from '../../../utils/data-manager.js';
 import { exhaustiveGuard } from '../../../utils/guard.js';
 import { animateText } from '../../../utils/text.utils.js';
 import { BattleCharacter } from '../../characters/battle-character.js';
@@ -61,7 +61,7 @@ export class BattleMenu {
   /** @type {Phaser.Tweens.Tween} */
   #userInputCursorPhaserTween;
   /** @type {boolean} */
-  #queuedMessagesSkipAnimation;
+  #skipAnimations;
   /** @type {boolean} */
   #queuedMessageAnimationPlaying;
   /**
@@ -70,7 +70,7 @@ export class BattleMenu {
    * @param {BattleCharacter} activePlayerCharacter
    *
    */
-  constructor(scene, activePlayerCharacter) {
+  constructor(scene, activePlayerCharacter, skipBattleAnimations = false) {
     this.#scene = scene;
     this.#activePlayerCharacter = activePlayerCharacter;
     this.#activeBattleMenu = ACTIVE_BATTLE_MENU.BATTLE_MAIN;
@@ -80,7 +80,7 @@ export class BattleMenu {
     this.#queuedInfoPanelMessages = [];
     this.#waitingForPlayerInput = false;
     this.#selectedAttackIndex = undefined;
-    this.#queuedMessagesSkipAnimation = false;
+    this.#skipAnimations = skipBattleAnimations;
     this.#queuedMessageAnimationPlaying = false;
     this.#createMainInfoPane();
     this.#createMainBattleMenu();
@@ -173,8 +173,8 @@ export class BattleMenu {
     }
 
     this.#updateSelectedBattleMenuOptionFromInput(input);
-    this.#moveMainBattleMenuCursor();
     this.#updateSelectedMoveMenuOptionFromInput(input);
+    this.#moveMainBattleMenuCursor();
     this.#moveMoveSelectBattleMenuCursor();
   }
 
@@ -182,14 +182,10 @@ export class BattleMenu {
    * @param {string} message
    * @param {() => void} [callback]
    */
-  updateInfoPaneMessagesNoInputRequired(
-    message,
-    callback,
-    skipAnimation = false
-  ) {
+  updateInfoPaneMessagesNoInputRequired(message, callback) {
     this.#battleTextGameObjectLine1.setText('').setAlpha(1);
 
-    if (skipAnimation) {
+    if (this.#skipAnimations) {
       this.#battleTextGameObjectLine1.setText(message);
       this.#waitingForPlayerInput = false;
       if (callback) {
@@ -199,7 +195,7 @@ export class BattleMenu {
     }
 
     animateText(this.#scene, this.#battleTextGameObjectLine1, message, {
-      delay: 50,
+      delay: dataManager.getAnimatedTextSpeed(),
       callback: () => {
         this.#waitingForPlayerInput = false;
         if (callback) {
@@ -212,16 +208,10 @@ export class BattleMenu {
   /**
    * @param {string[]} messages
    * @param {() => void} [callback]
-   * @param {boolean} [skipAnimation=false]
    */
-  updateInfoPaneMessagesAndWaitForInput(
-    messages,
-    callback,
-    skipAnimation = false
-  ) {
+  updateInfoPaneMessagesAndWaitForInput(messages, callback) {
     this.#queuedInfoPanelMessages = messages;
     this.#queuedInfoPanelCallback = callback;
-    this.#queuedMessagesSkipAnimation = skipAnimation;
 
     this.#updateInfoPaneWithMessage();
   }
@@ -243,7 +233,7 @@ export class BattleMenu {
     //Get first message from queue and animate message
     const messageToDisplay = this.#queuedInfoPanelMessages.shift();
 
-    if (this.#queuedMessagesSkipAnimation) {
+    if (this.#skipAnimations) {
       this.#battleTextGameObjectLine1.setText(messageToDisplay);
       this.#queuedMessageAnimationPlaying = false;
       this.#waitingForPlayerInput = true;
@@ -259,7 +249,7 @@ export class BattleMenu {
       this.#battleTextGameObjectLine1,
       messageToDisplay,
       {
-        delay: 50,
+        delay: dataManager.getAnimatedTextSpeed(),
         callback: () => {
           this.playInputCursorAnimation();
           this.#waitingForPlayerInput = true;
@@ -646,8 +636,7 @@ export class BattleMenu {
         ['Your bag is empty...'],
         () => {
           this.#switchToMainBattleMenu();
-        },
-        SKIP_BATTLE_ANIMATIONS
+        }
       );
       return;
     }
@@ -657,8 +646,7 @@ export class BattleMenu {
         ['You have no other characters in your party...'],
         () => {
           this.#switchToMainBattleMenu();
-        },
-        SKIP_BATTLE_ANIMATIONS
+        }
       );
       return;
     }
@@ -668,8 +656,7 @@ export class BattleMenu {
         ['You fail to run away...'],
         () => {
           this.#switchToMainBattleMenu();
-        },
-        SKIP_BATTLE_ANIMATIONS
+        }
       );
       return;
     }

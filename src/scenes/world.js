@@ -30,12 +30,12 @@ const CUSTOM_TILED_TYPES = Object.freeze({
 
 const TILED_NPC_PROPERTY = Object.freeze({
   MESSAGE: 'is_spawn_point',
-  NPC_PATH: 'movement_pattern',
+  MOVEMENT_PATTERN: 'movement_pattern',
   MESSAGES: 'messages',
   FRAME: 'frame',
 });
 
-export default class World extends Scene {
+export default class WorldScene extends Scene {
   /** @type {Player} */
   #player;
   /** @type {Controls} */
@@ -60,13 +60,13 @@ export default class World extends Scene {
   }
 
   init() {
-    console.log(`[${World.name}:init] invoked`);
+    console.log(`[${WorldScene.name}:init] invoked`);
     this.#wildMonsterEncountered = false;
     this.#npcPlayerIsInteractingWith = undefined;
   }
 
   create() {
-    console.log(`[${World.name}:created] invoked`);
+    console.log(`[${WorldScene.name}:created] invoked`);
 
     const x = 6 * TILE_SIZE;
     const y = 22 * TILE_SIZE;
@@ -84,7 +84,7 @@ export default class World extends Scene {
     //Collision Tiles and Layer
     if (!collisionTiles) {
       console.log(
-        `[${World.name}:create] encountered error while creating collision tileset using data from tile`
+        `[${WorldScene.name}:create] encountered error while creating collision tileset using data from tile`
       );
       return;
     }
@@ -92,7 +92,7 @@ export default class World extends Scene {
     const collisionLayer = map.createLayer('Collision', collisionTiles, 0, 0);
     if (!collisionLayer) {
       console.log(
-        `[${World.name}:create] encountered error while creating collision layer using data from tile`
+        `[${WorldScene.name}:create] encountered error while creating collision layer using data from tile`
       );
       return;
     }
@@ -103,7 +103,7 @@ export default class World extends Scene {
 
     if (!this.#signLayer) {
       console.log(
-        `[${World.name}:create] encountered error while creating sign layer using data from tile`
+        `[${WorldScene.name}:create] encountered error while creating sign layer using data from tile`
       );
       return;
     }
@@ -116,7 +116,7 @@ export default class World extends Scene {
 
     if (!encounterTiles) {
       console.log(
-        `[${World.name}:create] encountered error while creating encounter tiles using data from tile`
+        `[${WorldScene.name}:create] encountered error while creating encounter tiles using data from tile`
       );
       return;
     }
@@ -124,7 +124,7 @@ export default class World extends Scene {
     this.#encounterLayer = map.createLayer('Encounter', encounterTiles, 0, 0);
     if (!this.#encounterLayer) {
       console.log(
-        `[${World.name}:create] encountered error while creating encounter layer using data from tile`
+        `[${WorldScene.name}:create] encountered error while creating encounter layer using data from tile`
       );
       return;
     }
@@ -145,6 +145,9 @@ export default class World extends Scene {
       collisionLayer: collisionLayer,
       spriteGridMovementFinishedCallback: () => {
         this.#handlePlayerMovementUpdate();
+      },
+      spriteChangedDirectionCallback: () => {
+        this.#handlePlayerDirectionUpdate();
       },
       otherCharactersToCheckForCollisionsWith: this.#npcs,
     });
@@ -265,6 +268,7 @@ export default class World extends Scene {
       nearbyNpc.isTalkingToPlayer = true;
       this.#npcPlayerIsInteractingWith = nearbyNpc;
       this.#dialogUi.showDialogModal(nearbyNpc.messages);
+      return;
     }
   }
 
@@ -276,11 +280,6 @@ export default class World extends Scene {
       x: this.#player.sprite.x,
       y: this.#player.sprite.y,
     });
-
-    dataManager.store.set(
-      DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION,
-      this.#player.direction
-    );
 
     if (!this.#encounterLayer) {
       return;
@@ -298,13 +297,13 @@ export default class World extends Scene {
     }
 
     console.log(
-      `[${World.name}:handlePlayerMovementUpdate] player is in a encounter zone`
+      `[${WorldScene.name}:handlePlayerMovementUpdate] player is in a encounter zone`
     );
     this.#wildMonsterEncountered = Math.random() < 0.2;
 
     if (this.#wildMonsterEncountered) {
       console.log(
-        `[${World.name}:handlePlayerMovementUpdate] player encountered a wild monster`
+        `[${WorldScene.name}:handlePlayerMovementUpdate] player encountered a wild monster`
       );
       this.cameras.main.fadeOut(2000);
       this.cameras.main.once(
@@ -347,6 +346,24 @@ export default class World extends Scene {
         return;
       }
 
+      // Get the path objects for the npc
+      const pathObjects = layer.objects.filter((obj) => {
+        return obj.type === CUSTOM_TILED_TYPES.NPC_PATH;
+      });
+
+      /** @type {import('../world/characters/npc.js').NPCPath} */
+      const npcPath = {
+        0: { x: npcObject.x, y: npcObject.y - TILE_SIZE },
+      };
+
+      pathObjects.forEach((obj) => {
+        if (obj.x === undefined || obj.y === undefined) {
+          return;
+        }
+
+        npcPath[parseInt(obj.name, 10)] = { x: obj.x, y: obj.y - TILE_SIZE };
+      });
+
       /** @type {string} */
       const npcFrame =
         /** @type {TiledObjectProperty[]} */
@@ -361,6 +378,12 @@ export default class World extends Scene {
           (property) => property.name === TILED_NPC_PROPERTY.MESSAGES
         )?.value || '';
 
+      /** @type {import('../world/characters/npc.js').NpcMovementPattern} */
+      const npcMovement =
+        /** @type {TiledObjectProperty[]} */ npcObject.properties.find(
+          (property) => property.name === TILED_NPC_PROPERTY.MOVEMENT_PATTERN
+        )?.value || 'IDLE';
+
       const npcMessages = npcMessagesString.split('::');
 
       const npc = new NPC({
@@ -369,9 +392,22 @@ export default class World extends Scene {
         direction: DIRECTION.DOWN,
         frame: parseInt(npcFrame, 10),
         messages: npcMessages,
+        npcPath,
+        movementPattern: npcMovement,
       });
 
       this.#npcs.push(npc);
     });
+  }
+
+  /**
+   * @returns {void}
+   */
+  #handlePlayerDirectionUpdate() {
+    // update player direction on global data store
+    dataManager.store.set(
+      DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION,
+      this.#player.direction
+    );
   }
 }

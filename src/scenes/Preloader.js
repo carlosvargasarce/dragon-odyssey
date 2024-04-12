@@ -8,11 +8,14 @@ import {
   CLASSES_ASSET_KEYS,
   DATA_ASSET_KEYS,
   HEALTH_BAR_ASSET_KEYS,
+  OPTIONS_ASSET_KEYS,
+  TITLE_ASSET_KEYS,
   UI_ASSET_KEYS,
   WORLD_ASSET_KEYS,
 } from '../assets/asset-keys.js';
 import { FUGAZ_ONE_FONT_NAME, LATO_FONT_NAME } from '../assets/font-keys.js';
 import { WebFontFileLoader } from '../assets/web-font-file-loader.js';
+import { dataManager } from '../utils/data-manager.js';
 import { DataUtils } from '../utils/data-utils.js';
 import { SCENE_KEYS } from './scene-keys.js';
 
@@ -86,6 +89,25 @@ export default class PreLoader extends Scene {
     this.load.image(
       UI_ASSET_KEYS.CURSOR,
       `${dragonOdysseyAssetPath}/ui/cursor.png`
+    );
+
+    this.load.image(
+      UI_ASSET_KEYS.CURSOR_WHITE,
+      `${dragonOdysseyAssetPath}/ui/cursor_white.png`
+    );
+
+    this.load.image(
+      UI_ASSET_KEYS.MENU_BACKGROUND,
+      `${dragonOdysseyAssetPath}/title/glass_panel.png`
+    );
+
+    this.load.image(
+      UI_ASSET_KEYS.MENU_BACKGROUND_BLUE,
+      `${dragonOdysseyAssetPath}/title/glass_panel_blue.png`
+    );
+    this.load.image(
+      UI_ASSET_KEYS.MENU_BACKGROUND_GREEN,
+      `${dragonOdysseyAssetPath}/title/glass_panel_green.png`
     );
 
     // Load JSON Data
@@ -165,12 +187,30 @@ export default class PreLoader extends Scene {
         frameHeight: 64,
       }
     );
+
+    //Title Scene Assets
+    this.load.image(
+      TITLE_ASSET_KEYS.BACKGROUND,
+      `${dragonOdysseyAssetPath}/title/background.jpg`
+    );
+
+    this.load.image(
+      TITLE_ASSET_KEYS.TITLE,
+      `${dragonOdysseyAssetPath}/title/title_text.png`
+    );
+
+    //Options Scene Assets
+    this.load.image(
+      OPTIONS_ASSET_KEYS.BACKGROUNDS,
+      `${dragonOdysseyAssetPath}/options/background.jpg`
+    );
   }
 
   create() {
     console.log(`[${PreLoader.name}:create] invoked`);
     this.#createAnimations();
-    this.scene.start(SCENE_KEYS.WORLD_SCENE);
+    dataManager.loadData();
+    this.scene.start(SCENE_KEYS.TITLE_SCENE);
   }
 
   #createAnimations() {

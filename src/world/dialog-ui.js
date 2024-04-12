@@ -1,5 +1,6 @@
 import { UI_ASSET_KEYS } from '../assets/asset-keys.js';
 import { LATO_FONT_NAME } from '../assets/font-keys.js';
+import { dataManager } from '../utils/data-manager.js';
 import { CANNOT_READ_SIGN_TEXT, animateText } from '../utils/text.utils.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
@@ -100,7 +101,7 @@ export class DialogUi {
     this.#uiText.setText('').setAlpha(1);
 
     animateText(this.#scene, this.#uiText, this.#messagesToShow.shift(), {
-      delay: 50,
+      delay: dataManager.getAnimatedTextSpeed(),
       callback: () => {
         this.#textAnimationPlaying = false;
       },

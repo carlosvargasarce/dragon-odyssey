@@ -58,5 +58,41 @@
     "delay": 0,
     "yoyo": false,
     "assetKey": "SLASH"
+  },
+  {
+    "key": "NPC_1_DOWN",
+    "frames": [0, 1, 2],
+    "frameRate": 6,
+    "repeat": -1,
+    "delay": 0,
+    "yoyo": true,
+    "assetKey": "NPC"
+  },
+  {
+    "key": "NPC_1_LEFT",
+    "frames": [3, 4, 5],
+    "frameRate": 6,
+    "repeat": -1,
+    "delay": 0,
+    "yoyo": true,
+    "assetKey": "NPC"
+  },
+  {
+    "key": "NPC_1_RIGHT",
+    "frames": [6, 7, 8],
+    "frameRate": 6,
+    "repeat": -1,
+    "delay": 0,
+    "yoyo": true,
+    "assetKey": "NPC"
+  },
+  {
+    "key": "NPC_1_UP",
+    "frames": [9, 10, 11],
+    "frameRate": 6,
+    "repeat": -1,
+    "delay": 0,
+    "yoyo": true,
+    "assetKey": "NPC"
   }
 ]
