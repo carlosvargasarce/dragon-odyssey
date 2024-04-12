@@ -5,6 +5,7 @@ import { TILE_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
 import { Controls } from '../utils/controls.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { getTargetPositionFromGameObjectPositionAndDirection } from '../utils/grid-utils.js';
+import SpriteFacade from '../utils/spriteFacade.js';
 import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text.utils.js';
 import { NPC } from '../world/characters/npc.js';
 import { Player } from '../world/characters/player.js';
@@ -130,7 +131,11 @@ export default class WorldScene extends Scene {
     }
     this.#encounterLayer.setAlpha(TILE_COLLISION_LAYER_ALPHA).setDepth(2);
 
-    this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_BACKGROUND, 0).setOrigin(0);
+    SpriteFacade.createSprite(
+      this,
+      { x: 0, y: 0 },
+      { assetKey: WORLD_ASSET_KEYS.WORLD_BACKGROUND, assetFrame: 0 }
+    ).setOrigin(0);
 
     //Create NPCS
     this.#createNPCs(map);
@@ -160,7 +165,12 @@ export default class WorldScene extends Scene {
     });
 
     // Create Foreground for Depth
-    this.add.image(0, 0, WORLD_ASSET_KEYS.WORLD_FOREGROUND, 0).setOrigin(0);
+    SpriteFacade.createSprite(
+      this,
+      { x: 0, y: 0 },
+      { assetKey: WORLD_ASSET_KEYS.WORLD_FOREGROUND, assetFrame: 0 }
+    ).setOrigin(0);
+
     this.#controls = new Controls(this);
 
     // Create Dialog UI

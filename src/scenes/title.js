@@ -5,6 +5,7 @@ import { DIRECTION } from '../common/direction.js';
 import { Controls } from '../utils/controls.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { NineSlice } from '../utils/nine-slice.js';
+import SpriteFacade from '../utils/spriteFacade.js';
 import { SCENE_KEYS } from './scene-keys.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
@@ -64,14 +65,19 @@ export default class TitleScene extends Scene {
     this.#selectedMenuOption = MAIN_MENU_OPTIONS.NEW_GAME;
     this.#isContinueButtonEnabled = false;
 
-    this.add
-      .image(0, 0, TITLE_ASSET_KEYS.BACKGROUND)
+    SpriteFacade.createSprite(
+      this,
+      { x: 0, y: 0 },
+      { assetKey: TITLE_ASSET_KEYS.BACKGROUND }
+    )
       .setOrigin(0)
       .setScale(0.501);
 
-    this.add
-      .image(this.scale.width / 2, 150, TITLE_ASSET_KEYS.TITLE)
-      .setScale(1);
+    SpriteFacade.createSprite(
+      this,
+      { x: this.scale.width / 2, y: 150 },
+      { assetKey: TITLE_ASSET_KEYS.TITLE }
+    ).setScale(1);
 
     // Create Menu
     const menuBgWidth = 480;
@@ -107,8 +113,11 @@ export default class TitleScene extends Scene {
     menuContainer.setPosition(this.scale.width / 2 - menuBgWidth / 2, 300);
 
     // Create Cursor
-    this.#mainMenuCursorPhaserImageGameObject = this.add
-      .image(PLAYER_INPUT_CURSOR_POSITION.x, 54, UI_ASSET_KEYS.CURSOR)
+    this.#mainMenuCursorPhaserImageGameObject = SpriteFacade.createSprite(
+      this,
+      { x: PLAYER_INPUT_CURSOR_POSITION.x, y: 54 },
+      { assetKey: UI_ASSET_KEYS.CURSOR }
+    )
       .setOrigin(0.5)
       .setScale(1);
 

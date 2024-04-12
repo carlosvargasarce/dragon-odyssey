@@ -1,4 +1,5 @@
 import { BATTLE_BACKGROUND_ASSET_KEYS } from '../assets/asset-keys.js';
+import SpriteFacade from '../utils/spriteFacade.js';
 
 export class Background {
   /** @type {Phaser.Scene} */
@@ -12,8 +13,11 @@ export class Background {
   constructor(scene) {
     this.#scene = scene;
 
-    this.#backgroundGameObject = this.#scene.add
-      .image(0, 0, BATTLE_BACKGROUND_ASSET_KEYS.MEADOW)
+    this.#backgroundGameObject = SpriteFacade.createSprite(
+      this.#scene,
+      { x: 0, y: 0 },
+      { assetKey: BATTLE_BACKGROUND_ASSET_KEYS.MEADOW }
+    )
       .setOrigin(0)
       .setAlpha(0)
       .setScale(0.5);

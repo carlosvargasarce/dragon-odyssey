@@ -12,6 +12,7 @@ import { Controls } from '../utils/controls.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { NineSlice } from '../utils/nine-slice.js';
+import SpriteFacade from '../utils/spriteFacade.js';
 import { SCENE_KEYS } from './scene-keys.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
@@ -122,8 +123,11 @@ export default class OptionsScene extends Phaser.Scene {
     console.log(`[${OptionsScene.name}:create] invoked`);
 
     //Backound Image
-    this.add
-      .image(0, 0, OPTIONS_ASSET_KEYS.BACKGROUNDS)
+    SpriteFacade.createSprite(
+      this,
+      { x: 0, y: 0 },
+      { assetKey: OPTIONS_ASSET_KEYS.BACKGROUNDS }
+    )
       .setOrigin(0)
       .setScale(0.431);
 
@@ -209,13 +213,21 @@ export default class OptionsScene extends Phaser.Scene {
       '',
       OPTIONS_TEXT_STYLE
     );
-    this.add
-      .image(530, 338, UI_ASSET_KEYS.CURSOR_WHITE)
+
+    SpriteFacade.createSprite(
+      this,
+      { x: 530, y: 338 },
+      { assetKey: UI_ASSET_KEYS.CURSOR_WHITE }
+    )
       .setOrigin(1, 0)
       .setScale(1)
       .setFlipX(true);
-    this.add
-      .image(660, 338, UI_ASSET_KEYS.CURSOR_WHITE)
+
+    SpriteFacade.createSprite(
+      this,
+      { x: 660, y: 338 },
+      { assetKey: UI_ASSET_KEYS.CURSOR_WHITE }
+    )
       .setOrigin(0, 0)
       .setScale(1);
 

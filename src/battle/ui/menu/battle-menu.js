@@ -2,6 +2,7 @@ import { UI_ASSET_KEYS } from '../../../assets/asset-keys.js';
 import { DIRECTION } from '../../../common/direction.js';
 import { dataManager } from '../../../utils/data-manager.js';
 import { exhaustiveGuard } from '../../../utils/guard.js';
+import SpriteFacade from '../../../utils/spriteFacade.js';
 import { animateText } from '../../../utils/text.utils.js';
 import { BattleCharacter } from '../../characters/battle-character.js';
 import { BATTLE_UI_TEXT_STYLE } from './battle-menu-config.js';
@@ -273,13 +274,11 @@ export class BattleMenu {
       BATTLE_UI_TEXT_STYLE
     );
 
-    this.#mainBattleMenuCursorPhaserImageGameObject = this.#scene.add
-      .image(
-        BATTLE_MENU_CURSOR_POS.x,
-        BATTLE_MENU_CURSOR_POS.y,
-        UI_ASSET_KEYS.CURSOR,
-        0
-      )
+    this.#mainBattleMenuCursorPhaserImageGameObject = SpriteFacade.createSprite(
+      this.#scene,
+      { x: BATTLE_MENU_CURSOR_POS.x, y: BATTLE_MENU_CURSOR_POS.y },
+      { assetKey: UI_ASSET_KEYS.CURSOR }
+    )
       .setOrigin(0.5)
       .setScale(1);
 
@@ -321,15 +320,14 @@ export class BattleMenu {
   }
 
   #createCharacterAttackSubMenu() {
-    this.#attackBattleMenuCursorPhaserImageGameObject = this.#scene.add
-      .image(
-        ATTACK_MENU_CURSOR_POS.x,
-        ATTACK_MENU_CURSOR_POS.y,
-        UI_ASSET_KEYS.CURSOR,
-        0
+    this.#attackBattleMenuCursorPhaserImageGameObject =
+      SpriteFacade.createSprite(
+        this.#scene,
+        { x: ATTACK_MENU_CURSOR_POS.x, y: ATTACK_MENU_CURSOR_POS.y },
+        { assetKey: UI_ASSET_KEYS.CURSOR, assetFrame: 0 }
       )
-      .setOrigin(0.5)
-      .setScale(1);
+        .setOrigin(0.5)
+        .setScale(1);
 
     /** @type {string[]} */
     const attackNames = [];
@@ -687,11 +685,12 @@ export class BattleMenu {
   }
 
   #createPlayerInputCursor() {
-    this.#userInputCursorPhaserImageGameObject = this.#scene.add.image(
-      0,
-      0,
-      UI_ASSET_KEYS.CURSOR
+    this.#userInputCursorPhaserImageGameObject = SpriteFacade.createSprite(
+      this.#scene,
+      { x: 0, y: 0 },
+      { assetKey: UI_ASSET_KEYS.CURSOR }
     );
+
     this.#userInputCursorPhaserImageGameObject.setAngle(90).setScale(1.2, 1);
     this.#userInputCursorPhaserImageGameObject.setAlpha(0);
 

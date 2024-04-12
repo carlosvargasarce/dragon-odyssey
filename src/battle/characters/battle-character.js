@@ -1,6 +1,7 @@
 import { BATTLE_ASSET_KEYS } from '../../assets/asset-keys.js';
 import { FUGAZ_ONE_FONT_NAME, LATO_FONT_NAME } from '../../assets/font-keys.js';
 import { DataUtils } from '../../utils/data-utils.js';
+import SpriteFacade from '../../utils/spriteFacade.js';
 import { Healthbar } from '../ui/healthbar.js';
 
 export class BattleCharacter {
@@ -38,13 +39,14 @@ export class BattleCharacter {
     this._characterAttacks = [];
     this._skipBattleAnimations = config.skipBattleAnimation || false;
 
-    this._phaserGameObject = this._scene.add
-      .image(
-        position.x,
-        position.y,
-        this._characterDetails.assetKey,
-        this._characterDetails.assetFrame || 0
-      )
+    this._phaserGameObject = SpriteFacade.createSprite(
+      this._scene,
+      { x: position.x, y: position.y },
+      {
+        assetKey: this._characterDetails.assetKey,
+        assetFrame: this._characterDetails.assetFrame || 0,
+      }
+    )
       .setScale(scale)
       .setAlpha(0);
 
@@ -177,8 +179,11 @@ export class BattleCharacter {
       fontFamily: FUGAZ_ONE_FONT_NAME,
     });
 
-    const healthBarBgImage = this._scene.add
-      .image(6, 0, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND)
+    const healthBarBgImage = SpriteFacade.createSprite(
+      this._scene,
+      { x: 6, y: 0 },
+      { assetKey: BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND }
+    )
       .setOrigin(0)
       .setScale(0.5, scaleHealthBarBackgroundImageByY);
 
