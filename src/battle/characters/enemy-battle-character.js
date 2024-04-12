@@ -119,4 +119,12 @@ export class EnemyBattleCharacter extends BattleCharacter {
       },
     });
   }
+
+  clone() {
+    return new EnemyBattleCharacter({
+      scene: this._scene,
+      characterDetails: { ...this._characterDetails },
+      skipBattleAnimation: this._skipBattleAnimations,
+    });
+  }
 }

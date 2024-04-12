@@ -95,8 +95,7 @@ export default class Battle extends Scene {
     const background = new Background(this);
     background.showMeadow();
 
-    // Render out the player and enemy characters
-    this.#activeEnemyCharacter = new EnemyBattleCharacter({
+    let enemyPrototype = new EnemyBattleCharacter({
       scene: this,
       characterDetails: {
         name: CHARACTER_ASSET_KEYS.FERNBITE,
@@ -108,8 +107,13 @@ export default class Battle extends Scene {
         baseAttack: 15,
         currentLevel: 5,
       },
-      skipBattleAnimation: this.#skipAnimations,
+      skipBattleAnimation: false,
     });
+
+    // Render out the player and enemy characters
+    //Clone is being use for enemies using prototype pattern, in the future if we want to spawn
+    //multiple enemies we could stick with this approach
+    this.#activeEnemyCharacter = enemyPrototype.clone();
 
     this.#activePlayerCharacter = new PlayerBattleCharacter({
       scene: this,
