@@ -11,7 +11,9 @@ import { ATTACK_KEYS } from '../battle/attacks/attack-keys.js';
 
 /**
  * @typedef Character
- * @type {object}
+ * @type {object}}
+ * @property {number} id
+ * @property {number} characterId
  * @property {string} name
  * @property {string} assetKey
  * @property {number} [assetFrame=0]
@@ -20,7 +22,39 @@ import { ATTACK_KEYS } from '../battle/attacks/attack-keys.js';
  * @property {number} currentHp
  * @property {number} baseAttack
  * @property {number[]} attackIds
- *
+ */
+
+/**
+ * @typedef Enemy
+ * @type {object}}
+ * @property {number} id
+ * @property {number} enemyId
+ * @property {string} name
+ * @property {string} assetKey
+ * @property {number} [assetFrame=0]
+ * @property {number} currentLevel
+ * @property {number} maxHp
+ * @property {number} currentHp
+ * @property {number} baseAttack
+ * @property {number[]} attackIds
+ */
+
+/**
+ * @typedef {keyof typeof ITEM_EFFECT} ItemEffect
+ */
+
+/** @enum {ItemEffect} */
+export const ITEM_EFFECT = Object.freeze({
+  HEAL_30: 'HEAL_30',
+});
+
+/**
+ * @typedef Item
+ * @type {object}
+ * @property {number} id the unique id of this item
+ * @property {string} name the name of this item
+ * @property {ItemEffect} effect the effect of using this item
+ * @property {string} description the description of the item to show in the inventory bag
  */
 
 /**

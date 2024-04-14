@@ -1,9 +1,6 @@
-import Phaser, { Scene } from 'phaser';
-import {
-  CHARACTER_ASSET_KEYS,
-  CLASSES_ASSET_KEYS,
-} from '../assets/asset-keys.js';
+import Phaser from 'phaser';
 //import { IceShard } from '../battle/attacks/ice-shard.js';
+import { ENEMY_ASSET_KEYS } from '../assets/asset-keys.js';
 import {
   ATTACK_TARGET,
   AttackManager,
@@ -14,10 +11,10 @@ import { PlayerBattleCharacter } from '../battle/characters/player-battle-charac
 import { BattleMenu } from '../battle/ui/menu/battle-menu.js';
 import { DIRECTION } from '../common/direction.js';
 import { BATTLE_SCENE_OPTIONS } from '../common/options.js';
-import { Controls } from '../utils/controls.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { createSceneTransition } from '../utils/scene-transition.js';
 import { StateMachine } from '../utils/state-machine.js';
+import { BaseScene } from './base.js';
 import { SCENE_KEYS } from './scene-keys.js';
 
 const BATTLE_STATES = Object.freeze({
@@ -39,11 +36,9 @@ const BATTLE_STATES = Object.freeze({
  * @property {import('../types/typedef.js').Character[]} enemyCharacters
  */
 
-export default class Battle extends Scene {
+export default class Battle extends BaseScene {
   /** @type {BattleMenu} */
   #battleMenu;
-  /** @type {Controls} */
-  #controls;
   /** @type {EnemyBattleCharacter} */
   #activeEnemyCharacter;
   /** @type {PlayerBattleCharacter} */
@@ -61,7 +56,7 @@ export default class Battle extends Scene {
   /** @type {BattleSceneData} */
   #sceneData;
   /** @type {number} */
-  #activePlayerMonsterPartyIndex;
+  #activePlayerCharacterPartyIndex;
   /** @type {boolean} */
   #playerKnockedOut;
 
@@ -72,6 +67,7 @@ export default class Battle extends Scene {
   }
 
   init() {
+    super.init();
     this.#activePlayerAttackIndex = -1;
 
     /** @type {import('../common/options.js').BattleSceneMenuOptions | undefined} */
@@ -90,7 +86,8 @@ export default class Battle extends Scene {
   }
 
   create() {
-    console.log(`[${Battle.name}:create] invoked`);
+    super.create();
+
     // Create main background
     const background = new Background(this);
     background.showMeadow();
@@ -98,8 +95,10 @@ export default class Battle extends Scene {
     let enemyPrototype = new EnemyBattleCharacter({
       scene: this,
       characterDetails: {
-        name: CHARACTER_ASSET_KEYS.FERNBITE,
-        assetKey: CHARACTER_ASSET_KEYS.FERNBITE,
+        id: 2,
+        characterId: 2,
+        name: ENEMY_ASSET_KEYS.FERNBITE,
+        assetKey: ENEMY_ASSET_KEYS.FERNBITE,
         assetFrame: 0,
         currentHp: 25,
         maxHp: 25,
@@ -117,16 +116,9 @@ export default class Battle extends Scene {
 
     this.#activePlayerCharacter = new PlayerBattleCharacter({
       scene: this,
-      characterDetails: {
-        name: CLASSES_ASSET_KEYS.BERSEKER,
-        assetKey: CLASSES_ASSET_KEYS.BERSEKER,
-        assetFrame: 0,
-        currentHp: 25,
-        maxHp: 25,
-        attackIds: [2],
-        baseAttack: 5,
-        currentLevel: 5,
-      },
+      characterDetails: dataManager.store.get(
+        DATA_MANAGER_STORE_KEYS.ALLIES_IN_PARTY
+      )[0],
       skipBattleAnimation: this.#skipAnimations,
     });
 
@@ -140,8 +132,7 @@ export default class Battle extends Scene {
     this.#attackManager = new AttackManager(this, this.#skipAnimations);
 
     // Add Cursor keys
-    this.#controls = new Controls(this);
-    this.#controls.lockInput = true;
+    this._controls.lockInput = true;
 
     // this.escapeKey = this.input.keyboard.addKey(
     //   Phaser.Input.Keyboard.KeyCodes.ESC
@@ -152,13 +143,15 @@ export default class Battle extends Scene {
   }
 
   update() {
+    super.update();
+
     this.#battleStateMachine.update();
 
-    if (this.#controls.isInputLocked) {
+    if (this._controls.isInputLocked) {
       return;
     }
 
-    const wasSpaceKeyPressed = this.#controls.wasSpaceKeyPressed();
+    const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
     // const wasEnterKeyPressed = Phaser.Input.Keyboard.JustDown(this.enterKey);
     // const wasEscapeKeyPressed = Phaser.Input.Keyboard.JustDown(this.escapeKey);
 
@@ -205,12 +198,12 @@ export default class Battle extends Scene {
       this.#battleStateMachine.setState(BATTLE_STATES.ENEMY_INPUT);
     }
 
-    if (this.#controls.wasBackKeyPressed()) {
+    if (this._controls.wasBackKeyPressed()) {
       this.#battleMenu.handlePlayerInput('CANCEL');
       return;
     }
 
-    const selectedDirection = this.#controls.getDirectionKeyJustPressed();
+    const selectedDirection = this._controls.getDirectionKeyJustPressed();
 
     if (selectedDirection != DIRECTION.NONE) {
       this.#battleMenu.handlePlayerInput(selectedDirection);
@@ -346,7 +339,7 @@ export default class Battle extends Scene {
           this.#activeEnemyCharacter.playCharacterHealthBarAppearAnimation(
             () => undefined
           );
-          this.#controls.lockInput = false;
+          this._controls.lockInput = false;
           this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
             [`Wild ${this.#activeEnemyCharacter.name} appeared!`],
             () => {

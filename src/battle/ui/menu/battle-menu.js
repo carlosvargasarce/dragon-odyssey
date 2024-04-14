@@ -691,7 +691,7 @@ export class BattleMenu {
       { assetKey: UI_ASSET_KEYS.CURSOR }
     );
 
-    this.#userInputCursorPhaserImageGameObject.setAngle(90).setScale(1.2, 1);
+    this.#userInputCursorPhaserImageGameObject.setAngle(90).setScale(1.3, 1);
     this.#userInputCursorPhaserImageGameObject.setAlpha(0);
 
     this.#userInputCursorPhaserTween = this.#scene.add.tween({

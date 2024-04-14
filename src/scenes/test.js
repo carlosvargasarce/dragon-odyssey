@@ -1,7 +1,4 @@
-import {
-  CHARACTER_ASSET_KEYS,
-  CLASSES_ASSET_KEYS,
-} from '../assets/asset-keys.js';
+import { CLASSES_ASSET_KEYS, ENEMY_ASSET_KEYS } from '../assets/asset-keys.js';
 import { ATTACK_KEYS } from '../battle/attacks/attack-keys.js';
 import { IceShard } from '../battle/attacks/ice-shard.js';
 import { Slash } from '../battle/attacks/slash.js';
@@ -44,7 +41,7 @@ export default class TestScene extends Phaser.Scene {
       .image(256, 316, CLASSES_ASSET_KEYS.BERSEKER, 0)
       .setFlipX(false);
     this.#enemyMonster = this.add
-      .image(768, 144, CHARACTER_ASSET_KEYS.FERNBITE, 0)
+      .image(768, 144, ENEMY_ASSET_KEYS.FERNBITE, 0)
       .setFlipX(false);
     makeDraggable(this.#enemyMonster);
 

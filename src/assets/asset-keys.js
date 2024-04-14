@@ -7,7 +7,7 @@ export const CLASSES_ASSET_KEYS = Object.freeze({
   BERSEKER: 'BERSEKER',
 });
 
-export const CHARACTER_ASSET_KEYS = Object.freeze({
+export const ENEMY_ASSET_KEYS = Object.freeze({
   IGUANIGNITE: 'IGUANIGNITE',
   SKELETON: 'SKELETON',
   FERNBITE: 'FERNBITE',
@@ -15,6 +15,7 @@ export const CHARACTER_ASSET_KEYS = Object.freeze({
 
 export const BATTLE_ASSET_KEYS = Object.freeze({
   HEALTH_BAR_BACKGROUND: 'HEALTH_BAR_BACKGROUND',
+  HEALTH_BAR_BACKGROUND_SOLID: 'HEALTH_BAR_BACKGROUND_SOLID',
 });
 
 export const HEALTH_BAR_ASSET_KEYS = Object.freeze({
@@ -32,6 +33,8 @@ export const UI_ASSET_KEYS = Object.freeze({
   MENU_BACKGROUND: 'MENU_BACKGROUND',
   MENU_BACKGROUND_GREEN: 'MENU_BACKGROUND_GREEN',
   MENU_BACKGROUND_BLUE: 'MENU_BACKGROUND_BLUE',
+  RED_BUTTON: 'RED_BUTTON',
+  RED_BUTTON_SELECTED: 'RED_BUTTON_SELECTED',
 });
 
 export const DATA_ASSET_KEYS = Object.freeze({
@@ -66,4 +69,9 @@ export const TITLE_ASSET_KEYS = Object.freeze({
 
 export const OPTIONS_ASSET_KEYS = Object.freeze({
   BACKGROUNDS: 'BACKGROUNDS',
+});
+
+export const ALLIES_ASSET_KEYS = Object.freeze({
+  BACKGROUND_PATTERN: 'BACKGROUND_PATTERN',
+  ALLIES_DETAILS_BACKGROUND: 'ALLIES_DETAILS_BACKGROUND',
 });

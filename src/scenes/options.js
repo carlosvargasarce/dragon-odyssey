@@ -8,11 +8,11 @@ import {
   SOUND_OPTIONS,
   TEXT_SPEED_OPTIONS,
 } from '../common/options.js';
-import { Controls } from '../utils/controls.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { NineSlice } from '../utils/nine-slice.js';
 import SpriteFacade from '../utils/spriteFacade.js';
+import { BaseScene } from './base.js';
 import { SCENE_KEYS } from './scene-keys.js';
 
 /** @type {Phaser.Types.GameObjects.Text.TextStyle} */
@@ -25,7 +25,7 @@ const OPTIONS_TEXT_STYLE = Object.freeze({
 const OPTION_MENU_OPTION_INFO_MSG = Object.freeze({
   TEXT_SPEED: 'Choose one of three text display speeds.',
   BATTLE_SCENE: 'Chose to display battle animations and effects or not.',
-  BATTLE_STYLE: 'Choose to allow your monster to be recalled between rounds.',
+  BATTLE_STYLE: 'Choose to allow your character to be recalled between rounds.',
   SOUND: 'Choose to enable or disable the sound.',
   VOLUME: 'Choose the volume for the music and sound effects of the game.',
   MENU_COLOR: 'Choose one of the three menu color options.',
@@ -37,7 +37,7 @@ const TEXT_FONT_COLORS = Object.freeze({
   SELECTED: '#FFDF00',
 });
 
-export default class OptionsScene extends Phaser.Scene {
+export default class OptionsScene extends BaseScene {
   /** @type {Phaser.GameObjects.Container} */
   #mainContainer;
   /** @type {NineSlice} */
@@ -62,8 +62,6 @@ export default class OptionsScene extends Phaser.Scene {
   #selectedOptionInfoMsgTextGameObject;
   /** @type {Phaser.GameObjects.Rectangle} */
   #optionsMenuCursor;
-  /** @type {Controls} */
-  #controls;
   /** @type {import('../common/options.js').OptionMenuOptions} */
   #selectedOptionMenu;
   /** @type {import('../common/options.js').TextSpeedMenuOptions} */
@@ -86,7 +84,7 @@ export default class OptionsScene extends Phaser.Scene {
   }
 
   init() {
-    console.log(`[${OptionsScene.name}:init] invoked`);
+    super.init();
 
     this.#nineSliceMainContainer = new NineSlice({
       cornerCutSize: 32,
@@ -120,7 +118,7 @@ export default class OptionsScene extends Phaser.Scene {
   }
 
   create() {
-    console.log(`[${OptionsScene.name}:create] invoked`);
+    super.create();
 
     //Backound Image
     SpriteFacade.createSprite(
@@ -263,8 +261,6 @@ export default class OptionsScene extends Phaser.Scene {
     this.#updateVolumeSlider();
     this.#updateMenuColorDisplayText();
 
-    this.#controls = new Controls(this);
-
     this.cameras.main.once(
       Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
       () => {
@@ -274,27 +270,29 @@ export default class OptionsScene extends Phaser.Scene {
   }
 
   update() {
-    if (this.#controls.isInputLocked) {
+    super.update();
+
+    if (this._controls.isInputLocked) {
       return;
     }
 
-    if (this.#controls.wasBackKeyPressed()) {
-      this.#controls.lockInput = true;
+    if (this._controls.wasBackKeyPressed()) {
+      this._controls.lockInput = true;
       this.cameras.main.fadeOut(500, 0, 0, 0);
       return;
     }
 
     if (
-      this.#controls.wasSpaceKeyPressed() &&
+      this._controls.wasSpaceKeyPressed() &&
       this.#selectedOptionMenu === OPTION_MENU_OPTIONS.CONFIRM
     ) {
-      this.#controls.lockInput = true;
+      this._controls.lockInput = true;
       this.#updateOptionDataInDataManager();
       this.cameras.main.fadeOut(500, 0, 0, 0);
       return;
     }
 
-    const selectedDirection = this.#controls.getDirectionKeyJustPressed();
+    const selectedDirection = this._controls.getDirectionKeyJustPressed();
     if (selectedDirection !== DIRECTION.NONE) {
       this.#moveOptionMenuCursor(selectedDirection);
     }

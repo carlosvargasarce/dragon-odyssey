@@ -1,8 +1,6 @@
-import { Scene } from 'phaser';
 import { WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
 import { DIRECTION } from '../common/direction.js';
 import { TILE_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
-import { Controls } from '../utils/controls.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { getTargetPositionFromGameObjectPositionAndDirection } from '../utils/grid-utils.js';
 import SpriteFacade from '../utils/spriteFacade.js';
@@ -11,6 +9,7 @@ import { NPC } from '../world/characters/npc.js';
 import { Player } from '../world/characters/player.js';
 import { DialogUi } from '../world/dialog-ui.js';
 import { Menu } from '../world/menu/menu.js';
+import { BaseScene } from './base.js';
 import { SCENE_KEYS } from './scene-keys.js';
 
 /**
@@ -37,15 +36,13 @@ const TILED_NPC_PROPERTY = Object.freeze({
   FRAME: 'frame',
 });
 
-export default class WorldScene extends Scene {
+export default class WorldScene extends BaseScene {
   /** @type {Player} */
   #player;
-  /** @type {Controls} */
-  #controls;
   /** @type {Phaser.Tilemaps.TilemapLayer} */
   #encounterLayer;
   /** @type {boolean} */
-  #wildMonsterEncountered;
+  #wildEnemyEncountered;
   /** @type {Phaser.Tilemaps.ObjectLayer} */
   #signLayer;
   /** @type {DialogUi} */
@@ -64,13 +61,14 @@ export default class WorldScene extends Scene {
   }
 
   init() {
-    console.log(`[${WorldScene.name}:init] invoked`);
-    this.#wildMonsterEncountered = false;
+    super.init();
+
+    this.#wildEnemyEncountered = false;
     this.#npcPlayerIsInteractingWith = undefined;
   }
 
   create() {
-    console.log(`[${WorldScene.name}:create] invoked`);
+    super.create();
 
     const x = 6 * TILE_SIZE;
     const y = 22 * TILE_SIZE;
@@ -174,8 +172,6 @@ export default class WorldScene extends Scene {
       { assetKey: WORLD_ASSET_KEYS.WORLD_FOREGROUND, assetFrame: 0 }
     ).setOrigin(0);
 
-    this.#controls = new Controls(this);
-
     // Create Dialog UI
     this.#dialogUi = new DialogUi(this, 1280);
 
@@ -192,16 +188,18 @@ export default class WorldScene extends Scene {
    * @returns {void}
    */
   update(time) {
-    if (this.#wildMonsterEncountered) {
+    super.update();
+
+    if (this.#wildEnemyEncountered) {
       this.#player.update(time);
       return;
     }
 
-    const wasSpaceKeyPressed = this.#controls.wasSpaceKeyPressed();
+    const wasSpaceKeyPressed = this._controls.wasSpaceKeyPressed();
     const selectedDirectionHeldDown =
-      this.#controls.getDirectionKeyPressedDown();
+      this._controls.getDirectionKeyPressedDown();
     const selectedDirectionPressedOnce =
-      this.#controls.getDirectionKeyJustPressed();
+      this._controls.getDirectionKeyJustPressed();
     if (
       selectedDirectionHeldDown !== DIRECTION.NONE &&
       !this.#isPlayerInputLocked()
@@ -213,7 +211,7 @@ export default class WorldScene extends Scene {
       this.#handlePlayerInteraction();
     }
 
-    if (this.#controls.wasEnterKeyPressed() && !this.#player.isMoving) {
+    if (this._controls.wasEnterKeyPressed() && !this.#player.isMoving) {
       if (this.#dialogUi.isVisible) {
         return;
       }
@@ -240,15 +238,15 @@ export default class WorldScene extends Scene {
           this.#dialogUi.showDialogModal(['Game progress has been saved!']);
         }
 
-        // if (this.#menu.selectedMenuOption === 'MONSTERS') {
-        //   // pause this scene and launch the monster party scene
-        //   /** @type {import('./monster-party-scene.js').MonsterPartySceneData} */
-        //   const sceneDataToPass = {
-        //     previousSceneName: SCENE_KEYS.WORLD_SCENE,
-        //   };
-        //   this.scene.launch(SCENE_KEYS.MONSTER_PARTY_SCENE, sceneDataToPass);
-        //   this.scene.pause(SCENE_KEYS.WORLD_SCENE);
-        // }
+        if (this.#menu.selectedMenuOption === 'CHARACTERS') {
+          // pause this scene and launch the monster party scene
+          /** @type {import('./allies.js').CharacterPartySceneData} */
+          const sceneDataToPass = {
+            previousSceneName: SCENE_KEYS.WORLD_SCENE,
+          };
+          this.scene.launch(SCENE_KEYS.ALLYS_SCENE, sceneDataToPass);
+          this.scene.pause(SCENE_KEYS.WORLD_SCENE);
+        }
 
         // if (this.#menu.selectedMenuOption === 'BAG') {
         //   // pause this scene and launch the inventory scene
@@ -265,7 +263,7 @@ export default class WorldScene extends Scene {
         }
       }
 
-      if (this.#controls.wasBackKeyPressed()) {
+      if (this._controls.wasBackKeyPressed()) {
         this.#menu.hide();
       }
     }
@@ -380,9 +378,9 @@ export default class WorldScene extends Scene {
     console.log(
       `[${WorldScene.name}:handlePlayerMovementUpdate] player is in a encounter zone`
     );
-    this.#wildMonsterEncountered = Math.random() < 0.2;
+    this.#wildEnemyEncountered = Math.random() < 0.2;
 
-    if (this.#wildMonsterEncountered) {
+    if (this.#wildEnemyEncountered) {
       console.log(
         `[${WorldScene.name}:handlePlayerMovementUpdate] player encountered a wild monster`
       );
@@ -398,7 +396,7 @@ export default class WorldScene extends Scene {
 
   #isPlayerInputLocked() {
     return (
-      this.#controls.isInputLocked ||
+      this._controls.isInputLocked ||
       this.#dialogUi.isVisible ||
       this.#menu.isVisible
     );
