@@ -1,12 +1,12 @@
-import { Scene } from 'phaser';
 import {
+  ALLIES_ASSET_KEYS,
   ATTACK_ASSET_KEYS,
   BATTLE_ASSET_KEYS,
   BATTLE_BACKGROUND_ASSET_KEYS,
-  CHARACTER_ASSET_KEYS,
   CHARACTER_ENTITY_ASSET_KEYS,
   CLASSES_ASSET_KEYS,
   DATA_ASSET_KEYS,
+  ENEMY_ASSET_KEYS,
   HEALTH_BAR_ASSET_KEYS,
   OPTIONS_ASSET_KEYS,
   TITLE_ASSET_KEYS,
@@ -17,9 +17,10 @@ import { FUGAZ_ONE_FONT_NAME, LATO_FONT_NAME } from '../assets/font-keys.js';
 import { WebFontFileLoader } from '../assets/web-font-file-loader.js';
 import { dataManager } from '../utils/data-manager.js';
 import { DataUtils } from '../utils/data-utils.js';
+import { BaseScene } from './base.js';
 import { SCENE_KEYS } from './scene-keys.js';
 
-export default class PreLoader extends Scene {
+export default class PreLoader extends BaseScene {
   constructor() {
     super({
       key: SCENE_KEYS.PRELOAD_SCENE,
@@ -27,7 +28,8 @@ export default class PreLoader extends Scene {
   }
 
   preload() {
-    console.log(`[${PreLoader.name}:preload] invoked`);
+    super.preload();
+
     const dragonOdysseyAssetPath = 'assets/images/dragon-odyssey';
 
     // Background Assets
@@ -40,6 +42,12 @@ export default class PreLoader extends Scene {
     this.load.image(
       BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND,
       `${dragonOdysseyAssetPath}/ui/healthbar/healthbar-bg.png`
+    );
+
+    // Battle Assets
+    this.load.image(
+      BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND_SOLID,
+      `${dragonOdysseyAssetPath}/ui/healthbar/healthbar-bg-solid.png`
     );
 
     // Healthbar Assets
@@ -70,12 +78,12 @@ export default class PreLoader extends Scene {
 
     // Characters Assets
     this.load.image(
-      CHARACTER_ASSET_KEYS.FERNBITE,
+      ENEMY_ASSET_KEYS.FERNBITE,
       `${dragonOdysseyAssetPath}/enemies/fernbite.png`
     );
 
     this.load.image(
-      CHARACTER_ASSET_KEYS.IGUANIGNITE,
+      ENEMY_ASSET_KEYS.IGUANIGNITE,
       `${dragonOdysseyAssetPath}/enemies/iguanignite.png`
     );
 
@@ -105,9 +113,31 @@ export default class PreLoader extends Scene {
       UI_ASSET_KEYS.MENU_BACKGROUND_BLUE,
       `${dragonOdysseyAssetPath}/title/glass_panel_blue.png`
     );
+
     this.load.image(
       UI_ASSET_KEYS.MENU_BACKGROUND_GREEN,
       `${dragonOdysseyAssetPath}/title/glass_panel_green.png`
+    );
+
+    this.load.image(
+      UI_ASSET_KEYS.RED_BUTTON,
+      `${dragonOdysseyAssetPath}/ui/red_button.png`
+    );
+
+    this.load.image(
+      UI_ASSET_KEYS.RED_BUTTON_SELECTED,
+      `${dragonOdysseyAssetPath}/ui/red_button_selected.png`
+    );
+
+    // Allies Scene Assets
+    this.load.image(
+      ALLIES_ASSET_KEYS.BACKGROUND_PATTERN,
+      `${dragonOdysseyAssetPath}/allies/background-river.jpg`
+    );
+
+    this.load.image(
+      ALLIES_ASSET_KEYS.ALLIES_DETAILS_BACKGROUND,
+      `${dragonOdysseyAssetPath}/allies/details.png`
     );
 
     // Load JSON Data
@@ -207,10 +237,10 @@ export default class PreLoader extends Scene {
   }
 
   create() {
-    console.log(`[${PreLoader.name}:create] invoked`);
+    super.create();
     this.#createAnimations();
     dataManager.loadData();
-    this.scene.start(SCENE_KEYS.TITLE_SCENE);
+    this.scene.start(SCENE_KEYS.WORLD_SCENE);
   }
 
   #createAnimations() {

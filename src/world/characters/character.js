@@ -1,6 +1,10 @@
 import { DIRECTION } from '../../common/direction.js';
+import { PLAYER_SPEED } from '../../config.js';
 import { getTargetPositionFromGameObjectPositionAndDirection } from '../../utils/grid-utils.js';
 import { exhaustiveGuard } from '../../utils/guard.js';
+import FastMovement from './movement/FastMovement.js';
+import IMovementBehavior from './movement/IMovementBehavior.js';
+import NormalMovement from './movement/NormalMovement.js';
 
 /**
  * @typedef CharacterIdleFrameConfig
@@ -91,6 +95,9 @@ export class Character {
       config.spriteChangedDirectionCallback;
     this._objectsToCheckForCollisionsWith =
       config.objectsToCheckForCollisionsWith || [];
+    this.setMovementBehavior(
+      PLAYER_SPEED === 'FAST' ? new FastMovement() : new NormalMovement()
+    );
   }
 
   /** @type {Phaser.GameObjects.Sprite} */
@@ -109,6 +116,14 @@ export class Character {
   }
 
   /**
+   * Establece el comportamiento de movimiento para el personaje.
+   * @param {IMovementBehavior} movementBehavior - La estrategia de movimiento a utilizar.
+   */
+  setMovementBehavior(movementBehavior) {
+    this.movementBehavior = movementBehavior;
+  }
+
+  /**
    * @param {import('../../common/direction.js').Direction} direction
    * @returns {void}
    */
@@ -117,7 +132,7 @@ export class Character {
       return;
     }
 
-    this._moveSprite(direction);
+    this.movementBehavior.move(this, direction);
   }
 
   /**
@@ -169,11 +184,10 @@ export class Character {
   }
 
   /**
-   * @protected
    * @param {import('../../common/direction.js').Direction} direction
    * @returns {void}
    */
-  _moveSprite(direction) {
+  moveSprite(direction) {
     const changedDirection = this._direction !== direction;
     this._direction = direction;
 

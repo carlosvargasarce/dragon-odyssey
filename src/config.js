@@ -1,3 +1,8 @@
+const SPEEDS = {
+  NORMAL: 'NORMAL',
+  FAST: 'FAST',
+};
+
 export const SHOW_SOCIAL_LINKS = false;
 export const TILE_SIZE = 64;
 export const TILE_COLLISION_LAYER_ALPHA = 0;
@@ -6,3 +11,4 @@ export const TEXT_SPEED = Object.freeze({
   MEDIUM: 30,
   FAST: 15,
 });
+export const PLAYER_SPEED = SPEEDS.NORMAL;

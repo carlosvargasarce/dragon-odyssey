@@ -1,4 +1,6 @@
+import Allies from './scenes/allies.js';
 import Battle from './scenes/battle.js';
+import Details from './scenes/details.js';
 import Options from './scenes/options.js';
 import Preloader from './scenes/preloader.js';
 import Test from './scenes/test.js';
@@ -16,7 +18,7 @@ const config = {
     autoCenter: Phaser.Scale.CENTER_BOTH,
     parent: 'game-container',
   },
-  scene: [Preloader, Battle, World, Title, Options, Test],
+  scene: [Preloader, Battle, World, Title, Options, Test, Allies, Details],
 };
 
 export default new Phaser.Game(config);

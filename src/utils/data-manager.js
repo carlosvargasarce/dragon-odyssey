@@ -1,3 +1,5 @@
+import Phaser from 'phaser';
+import { CLASSES_ASSET_KEYS } from '../assets/asset-keys.js';
 import { DIRECTION } from '../common/direction.js';
 import {
   BATTLE_SCENE_OPTIONS,
@@ -7,16 +9,21 @@ import {
 } from '../common/options.js';
 import { TEXT_SPEED, TILE_SIZE } from '../config.js';
 import { exhaustiveGuard } from './guard.js';
-
 const LOCAL_STORAGE_KEY = 'DRAGON_ODYSSEY_DATA';
+
+/**
+ * @typedef AlliesData
+ * @type {object}
+ * @property {import('../types/typedef.js').Character[]} inParty
+ */
 
 /**
  * @typedef GlobalState
  * @type {object}
  * @property {object} player
  * @property {object} player.position
- * @property {object} player.position.x
- * @property {object} player.position.y
+ * @property {number} player.position.x
+ * @property {number} player.position.y
  * @property {import('../common/direction.js').Direction} player.direction
  * @property {object} options
  * @property {import('../common/options.js').TextSpeedMenuOptions} options.textSpeed
@@ -26,6 +33,7 @@ const LOCAL_STORAGE_KEY = 'DRAGON_ODYSSEY_DATA';
  * @property {import('../common/options.js').VolumeMenuOptions} options.volume
  * @property {import('../common/options.js').MenuColorOptions} options.menuColor
  * @property {boolean} gameStarted
+ * @property {AlliesData} allies
  *
  */
 
@@ -47,6 +55,22 @@ const initialState = {
     menuColor: 0,
   },
   gameStarted: false,
+  allies: {
+    inParty: [
+      {
+        id: 1,
+        characterId: 1,
+        name: CLASSES_ASSET_KEYS.BERSEKER,
+        assetKey: CLASSES_ASSET_KEYS.BERSEKER,
+        assetFrame: 0,
+        currentHp: 25,
+        maxHp: 25,
+        attackIds: [2],
+        baseAttack: 15,
+        currentLevel: 5,
+      },
+    ],
+  },
 };
 
 export const DATA_MANAGER_STORE_KEYS = Object.freeze({
@@ -60,7 +84,7 @@ export const DATA_MANAGER_STORE_KEYS = Object.freeze({
   OPTIONS_VOLUME: 'OPTIONS_VOLUME',
   OPTIONS_MENU_COLOR: 'OPTIONS_MENU_COLOR',
   GAME_STARTED: 'GAME_STARTED',
-  MONSTERS_IN_PARTY: 'MONSTERS_IN_PARTY',
+  ALLIES_IN_PARTY: 'ALLIES_IN_PARTY',
   INVENTORY: 'INVENTORY',
   ITEMS_PICKED_UP: 'ITEMS_PICKED_UP',
 });
@@ -140,16 +164,15 @@ class DataManager extends Phaser.Events.EventEmitter {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
   }
 
-  /**
-   * @param {Phaser.Scene} scene
-   * @returns {void}
-   */
-  startNewGame(scene) {
+  startNewGame() {
     // get existing data before resetting all of the data, so we can persist options data
     const existingData = { ...this.#dataManagerDataToGlobalStateObject() };
     existingData.player.position = { ...initialState.player.position };
     existingData.player.direction = initialState.player.direction;
     existingData.gameStarted = initialState.gameStarted;
+    existingData.allies = {
+      inParty: [...initialState.allies.inParty],
+    };
 
     this.#store.reset();
     this.#updateDataManager(existingData);
@@ -197,6 +220,7 @@ class DataManager extends Phaser.Events.EventEmitter {
       [DATA_MANAGER_STORE_KEYS.OPTIONS_VOLUME]: data.options.volume,
       [DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR]: data.options.menuColor,
       [DATA_MANAGER_STORE_KEYS.GAME_STARTED]: data.gameStarted,
+      [DATA_MANAGER_STORE_KEYS.ALLIES_IN_PARTY]: data.allies.inParty,
     });
   }
 
@@ -225,6 +249,9 @@ class DataManager extends Phaser.Events.EventEmitter {
         menuColor: this.#store.get(DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR),
       },
       gameStarted: this.#store.get(DATA_MANAGER_STORE_KEYS.GAME_STARTED),
+      allies: {
+        inParty: [...this.#store.get(DATA_MANAGER_STORE_KEYS.ALLIES_IN_PARTY)],
+      },
     };
   }
 }

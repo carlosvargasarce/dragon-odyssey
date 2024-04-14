@@ -163,7 +163,6 @@ export class Menu {
     const g = this.#scene.add.graphics();
     const menuColor = this.#getMenuColorsFromDataManager();
 
-    console.log('menuColor', menuColor);
     g.fillStyle(menuColor.main, 1);
     g.fillRect(1, 0, this.#width - 1, this.#height - 1);
     g.lineStyle(8, menuColor.border, 1);
