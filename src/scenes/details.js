@@ -2,6 +2,7 @@ import { ALLIES_ASSET_KEYS } from '../assets/asset-keys.js';
 import { LATO_FONT_NAME } from '../assets/font-keys.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { DataUtils } from '../utils/data-utils.js';
+import SpriteFacade from '../utils/spriteFacade.js';
 import { BaseScene } from './base.js';
 import { SCENE_KEYS } from './scene-keys.js';
 
@@ -68,16 +69,19 @@ export default class CharacterDetailsScene extends BaseScene {
   create() {
     super.create();
 
-    // create main background and title
-    this.add
-      .image(0, 0, ALLIES_ASSET_KEYS.ALLIES_DETAILS_BACKGROUND)
-      .setOrigin(0);
+    // Create main background and title
+    SpriteFacade.createSprite(
+      this,
+      { x: 0, y: 0 },
+      { assetKey: ALLIES_ASSET_KEYS.ALLIES_DETAILS_BACKGROUND }
+    ).setOrigin(0);
+
     this.add.text(10, 0, 'Character Details', {
       ...UI_TEXT_STYLE,
       fontSize: '48px',
     });
 
-    // add character details
+    // Add character details
     this.add.text(20, 60, `Lv. ${this.#characterDetails.currentLevel}`, {
       ...UI_TEXT_STYLE,
       fontSize: '40px',
@@ -86,8 +90,12 @@ export default class CharacterDetailsScene extends BaseScene {
       ...UI_TEXT_STYLE,
       fontSize: '40px',
     });
-    this.add
-      .image(160, 310, this.#characterDetails.assetKey)
+
+    SpriteFacade.createSprite(
+      this,
+      { x: 160, y: 310 },
+      { assetKey: this.#characterDetails.assetKey }
+    )
       .setOrigin(0, 1)
       .setScale(0.7);
 

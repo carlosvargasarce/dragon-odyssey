@@ -232,36 +232,44 @@ export default class CharacterPartyScene extends BaseScene {
   #createCharacter(x, y, characterDetails) {
     const container = this.add.container(x, y, []);
 
-    const background = this.add
-      .image(0, 0, BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND_SOLID)
+    const background = SpriteFacade.createSprite(
+      this,
+      { x: 0, y: 0 },
+      { assetKey: BATTLE_ASSET_KEYS.HEALTH_BAR_BACKGROUND_SOLID }
+    )
       .setOrigin(0)
       .setScale(1.1, 1.2)
       .setAlpha(0.95);
     this.#characterPartyBackgrounds.push(background);
 
-    const leftShadowCap = this.add
-      .image(160, 67, HEALTH_BAR_ASSET_KEYS.LEFT_CAP_SHADOW)
+    const leftShadowCap = SpriteFacade.createSprite(
+      this,
+      { x: 160, y: 67 },
+      { assetKey: HEALTH_BAR_ASSET_KEYS.LEFT_CAP_SHADOW }
+    )
       .setOrigin(0)
       .setAlpha(0.5);
-    const middleShadow = this.add
-      .image(
-        leftShadowCap.x + leftShadowCap.width,
-        67,
-        HEALTH_BAR_ASSET_KEYS.MIDDLE_SHADOW
-      )
+
+    const middleShadow = SpriteFacade.createSprite(
+      this,
+      { x: leftShadowCap.x + leftShadowCap.width, y: 67 },
+      { assetKey: HEALTH_BAR_ASSET_KEYS.LEFT_CAP_SHADOW }
+    )
       .setOrigin(0)
       .setAlpha(0.5);
+
     middleShadow.displayWidth = 285;
-    const rightShadowCap = this.add
-      .image(
-        middleShadow.x + middleShadow.displayWidth,
-        67,
-        HEALTH_BAR_ASSET_KEYS.RIGHT_CAP_SHADOW
-      )
+
+    const rightShadowCap = SpriteFacade.createSprite(
+      this,
+      { x: middleShadow.x + middleShadow.displayWidth, y: 67 },
+      { assetKey: HEALTH_BAR_ASSET_KEYS.RIGHT_CAP_SHADOW }
+    )
       .setOrigin(0)
       .setAlpha(0.5);
 
     const healthBar = new Healthbar(this, 100, 40, 240);
+
     healthBar.setMeterPercentageAnimated(
       characterDetails.currentHp / characterDetails.maxHp,
       {
@@ -313,8 +321,11 @@ export default class CharacterPartyScene extends BaseScene {
       .setOrigin(1, 0);
     this.#healthBarTextGameObjects.push(healthBarTextGameObject);
 
-    const characterImage = this.add
-      .image(35, 10, characterDetails.assetKey)
+    const characterImage = SpriteFacade.createSprite(
+      this,
+      { x: 35, y: 10 },
+      { assetKey: characterDetails.assetKey }
+    )
       .setOrigin(0)
       .setScale(0.35);
 
