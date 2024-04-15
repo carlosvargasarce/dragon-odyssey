@@ -1,12 +1,12 @@
 import { Slash } from '../slash.js';
 import AttackFactory from './attack-factory.js';
 
-/**
- *
- * @param {Phaser.Scene} scene
- * @param {import('../../../types/typedef.js').Coordinate} position
- */
 class SlashFactory extends AttackFactory {
+  /**
+   *
+   * @param {Phaser.Scene} scene
+   * @param {import('../../../types/typedef.js').Coordinate} position
+   */
   createAttack(scene, position) {
     return new Slash(scene, position);
   }
