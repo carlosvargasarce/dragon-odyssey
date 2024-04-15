@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { CLASSES_ASSET_KEYS } from '../assets/asset-keys.js';
 import { DIRECTION } from '../common/direction.js';
 import {
   BATTLE_SCENE_OPTIONS,
@@ -8,6 +7,7 @@ import {
   TEXT_SPEED_OPTIONS,
 } from '../common/options.js';
 import { TEXT_SPEED, TILE_SIZE } from '../config.js';
+import { DataUtils } from './data-utils.js';
 import { exhaustiveGuard } from './guard.js';
 const LOCAL_STORAGE_KEY = 'DRAGON_ODYSSEY_DATA';
 
@@ -34,6 +34,8 @@ const LOCAL_STORAGE_KEY = 'DRAGON_ODYSSEY_DATA';
  * @property {import('../common/options.js').MenuColorOptions} options.menuColor
  * @property {boolean} gameStarted
  * @property {AlliesData} allies
+ * @property {import('../types/typedef.js').Inventory} inventory
+ * @property {number[]} itemsPickedUp
  *
  */
 
@@ -56,21 +58,17 @@ const initialState = {
   },
   gameStarted: false,
   allies: {
-    inParty: [
-      {
-        id: 1,
-        characterId: 1,
-        name: CLASSES_ASSET_KEYS.BERSEKER,
-        assetKey: CLASSES_ASSET_KEYS.BERSEKER,
-        assetFrame: 0,
-        currentHp: 25,
-        maxHp: 25,
-        attackIds: [2],
-        baseAttack: 15,
-        currentLevel: 5,
-      },
-    ],
+    inParty: [],
   },
+  inventory: [
+    {
+      item: {
+        id: 1,
+      },
+      quantity: 10,
+    },
+  ],
+  itemsPickedUp: [],
 };
 
 export const DATA_MANAGER_STORE_KEYS = Object.freeze({
@@ -122,6 +120,17 @@ class DataManager extends Phaser.Events.EventEmitter {
   }
 
   /**
+   * @param {Phaser.Scene} scene
+   * @returns {void}
+   */
+  init(scene) {
+    const startingCharacter = DataUtils.getCharacterById(scene, 1);
+    this.#store.set(DATA_MANAGER_STORE_KEYS.ALLIES_IN_PARTY, [
+      startingCharacter,
+    ]);
+  }
+
+  /**
    * @returns {void}
    */
   loadData() {
@@ -164,7 +173,11 @@ class DataManager extends Phaser.Events.EventEmitter {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
   }
 
-  startNewGame() {
+  /**
+   * @param {Phaser.Scene} scene
+   * @returns {void}
+   */
+  startNewGame(scene) {
     // get existing data before resetting all of the data, so we can persist options data
     const existingData = { ...this.#dataManagerDataToGlobalStateObject() };
     existingData.player.position = { ...initialState.player.position };
@@ -173,9 +186,12 @@ class DataManager extends Phaser.Events.EventEmitter {
     existingData.allies = {
       inParty: [...initialState.allies.inParty],
     };
+    existingData.inventory = initialState.inventory;
+    existingData.itemsPickedUp = [...initialState.itemsPickedUp];
 
     this.#store.reset();
     this.#updateDataManager(existingData);
+    this.init(scene);
     this.saveData();
   }
 
@@ -204,6 +220,74 @@ class DataManager extends Phaser.Events.EventEmitter {
   }
 
   /**
+   * @param {Phaser.Scene} scene
+   * @returns {import('../types/typedef.js').InventoryItem[]}
+   */
+  getInventory(scene) {
+    /** @type {import('../types/typedef.js').InventoryItem[]} */
+    const items = [];
+    /** @type {import('../types/typedef.js').Inventory} */
+    const inventory = this.#store.get(DATA_MANAGER_STORE_KEYS.INVENTORY);
+    inventory.forEach((baseItem) => {
+      const item = DataUtils.getItem(scene, baseItem.item.id);
+      items.push({
+        item: item,
+        quantity: baseItem.quantity,
+      });
+    });
+    return items;
+  }
+
+  /**
+   * @param {import('../types/typedef.js').InventoryItem[]} items
+   * @returns {void}
+   */
+  updateInventory(items) {
+    /** @type {import('../types/typedef.js').BaseInventoryItem[]} */
+    const inventory = items.map((item) => {
+      return {
+        item: {
+          id: item.item.id,
+        },
+        quantity: item.quantity,
+      };
+    });
+    this.#store.set(DATA_MANAGER_STORE_KEYS.INVENTORY, inventory);
+  }
+
+  /**
+   * @param {import('../types/typedef.js').Item} item
+   * @param {number} quantity
+   */
+  addItem(item, quantity) {
+    /** @type {import('../types/typedef.js').Inventory} */
+    const inventory = this.#store.get(DATA_MANAGER_STORE_KEYS.INVENTORY);
+    const existingItem = inventory.find((inventoryItem) => {
+      return inventoryItem.item.id === item.id;
+    });
+    if (existingItem) {
+      existingItem.quantity += quantity;
+    } else {
+      inventory.push({
+        item,
+        quantity,
+      });
+    }
+    this.#store.set(DATA_MANAGER_STORE_KEYS.INVENTORY, inventory);
+  }
+
+  /**
+   * @param {number} itemId
+   */
+  addItemPickedUp(itemId) {
+    /** @type {number[]} */
+    const itemsPickedUp =
+      this.#store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP) || [];
+    itemsPickedUp.push(itemId);
+    this.#store.set(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP, itemsPickedUp);
+  }
+
+  /**
    *
    * @param {GlobalState} data
    * @returns {void}
@@ -221,6 +305,10 @@ class DataManager extends Phaser.Events.EventEmitter {
       [DATA_MANAGER_STORE_KEYS.OPTIONS_MENU_COLOR]: data.options.menuColor,
       [DATA_MANAGER_STORE_KEYS.GAME_STARTED]: data.gameStarted,
       [DATA_MANAGER_STORE_KEYS.ALLIES_IN_PARTY]: data.allies.inParty,
+      [DATA_MANAGER_STORE_KEYS.INVENTORY]: data.inventory,
+      [DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP]: data.itemsPickedUp || [
+        ...initialState.itemsPickedUp,
+      ],
     });
   }
 
@@ -252,6 +340,10 @@ class DataManager extends Phaser.Events.EventEmitter {
       allies: {
         inParty: [...this.#store.get(DATA_MANAGER_STORE_KEYS.ALLIES_IN_PARTY)],
       },
+      inventory: this.#store.get(DATA_MANAGER_STORE_KEYS.INVENTORY),
+      itemsPickedUp: [
+        ...(this.#store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP) || []),
+      ],
     };
   }
 }

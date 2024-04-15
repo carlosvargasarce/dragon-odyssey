@@ -2,6 +2,7 @@ import { WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
 import { DIRECTION } from '../common/direction.js';
 import { TILE_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
+import { DataUtils } from '../utils/data-utils.js';
 import { getTargetPositionFromGameObjectPositionAndDirection } from '../utils/grid-utils.js';
 import SpriteFacade from '../utils/spriteFacade.js';
 import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text.utils.js';
@@ -36,6 +37,12 @@ const TILED_NPC_PROPERTY = Object.freeze({
   FRAME: 'frame',
 });
 
+/**
+ * @typedef WorldSceneData
+ * @type {object}
+ * @property {boolean} [isPlayerKnockedOut]
+ */
+
 export default class WorldScene extends BaseScene {
   /** @type {Player} */
   #player;
@@ -53,6 +60,8 @@ export default class WorldScene extends BaseScene {
   #npcPlayerIsInteractingWith;
   /** @type {Menu} */
   #menu;
+  /** @type {WorldSceneData} */
+  #sceneData;
 
   constructor() {
     super({
@@ -60,11 +69,37 @@ export default class WorldScene extends BaseScene {
     });
   }
 
-  init() {
-    super.init();
+  /**
+   * @param {WorldSceneData} data
+   * @returns {void}
+   */
+  init(data) {
+    super.init(data);
+    this.#sceneData = data;
+
+    if (Object.keys(data).length === 0) {
+      this.#sceneData = {
+        isPlayerKnockedOut: false,
+      };
+    }
+
+    console.log('this.#sceneData WORLD', this.#sceneData);
 
     this.#wildEnemyEncountered = false;
     this.#npcPlayerIsInteractingWith = undefined;
+
+    // Update player location, and map data if the player was knocked out in a battle
+    if (this.#sceneData.isPlayerKnockedOut) {
+      dataManager.store.set(DATA_MANAGER_STORE_KEYS.PLAYER_POSITION, {
+        x: 6 * TILE_SIZE,
+        y: 21 * TILE_SIZE,
+      });
+
+      dataManager.store.set(
+        DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION,
+        DIRECTION.DOWN
+      );
+    }
   }
 
   create() {
@@ -178,7 +213,19 @@ export default class WorldScene extends BaseScene {
     // Create menu
     this.#menu = new Menu(this);
 
-    this.cameras.main.fadeIn(1000, 0, 0, 0);
+    this.cameras.main.fadeIn(1000, 0, 0, 0, (camera, progress) => {
+      if (progress === 1) {
+        // If the player was knocked out, we want to lock input, heal player, and then have npc show message
+        if (this.#sceneData.isPlayerKnockedOut) {
+          this.#healPlayerParty();
+          this.#dialogUi.showDialogModal([
+            'It looks like our party put up quite a fight...',
+            'We took a nice rest, now we are ready to battle again.',
+          ]);
+        }
+      }
+    });
+
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.GAME_STARTED, true);
   }
 
@@ -239,7 +286,7 @@ export default class WorldScene extends BaseScene {
         }
 
         if (this.#menu.selectedMenuOption === 'CHARACTERS') {
-          // pause this scene and launch the monster party scene
+          // Pause this scene and launch the monster party scene
           /** @type {import('./allies.js').CharacterPartySceneData} */
           const sceneDataToPass = {
             previousSceneName: SCENE_KEYS.WORLD_SCENE,
@@ -248,15 +295,15 @@ export default class WorldScene extends BaseScene {
           this.scene.pause(SCENE_KEYS.WORLD_SCENE);
         }
 
-        // if (this.#menu.selectedMenuOption === 'BAG') {
-        //   // pause this scene and launch the inventory scene
-        //   /** @type {import('./inventory-scene.js').InventorySceneData} */
-        //   const sceneDataToPass = {
-        //     previousSceneName: SCENE_KEYS.WORLD_SCENE,
-        //   };
-        //   this.scene.launch(SCENE_KEYS.INVENTORY_SCENE, sceneDataToPass);
-        //   this.scene.pause(SCENE_KEYS.WORLD_SCENE);
-        // }
+        if (this.#menu.selectedMenuOption === 'BAG') {
+          // Pause this scene and launch the inventory scene
+          /** @type {import('./inventory.js').InventorySceneData} */
+          const sceneDataToPass = {
+            previousSceneName: SCENE_KEYS.WORLD_SCENE,
+          };
+          this.scene.launch(SCENE_KEYS.INVENTORY_SCENE, sceneDataToPass);
+          this.scene.pause(SCENE_KEYS.WORLD_SCENE);
+        }
 
         if (this.#menu.selectedMenuOption === 'EXIT') {
           this.#menu.hide();
@@ -388,7 +435,15 @@ export default class WorldScene extends BaseScene {
       this.cameras.main.once(
         Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
         () => {
-          this.scene.start(SCENE_KEYS.BATTLE_SCENE);
+          /** @type {import('./battle.js').BattleSceneData} */
+          const dataToPass = {
+            enemyCharacters: [DataUtils.getEnemyById(this, 1)],
+            playerCharacters: dataManager.store.get(
+              DATA_MANAGER_STORE_KEYS.ALLIES_IN_PARTY
+            ),
+          };
+
+          this.scene.start(SCENE_KEYS.BATTLE_SCENE, dataToPass);
         }
       );
     }
@@ -487,10 +542,25 @@ export default class WorldScene extends BaseScene {
    * @returns {void}
    */
   #handlePlayerDirectionUpdate() {
-    // update player direction on global data store
+    // Update player direction on global data store
     dataManager.store.set(
       DATA_MANAGER_STORE_KEYS.PLAYER_DIRECTION,
       this.#player.direction
     );
+  }
+
+  /**
+   * @returns {void}
+   */
+  #healPlayerParty() {
+    // Heal all characters in party
+    /** @type {import('../types/typedef.js').Character[]} */
+    const characters = dataManager.store.get(
+      DATA_MANAGER_STORE_KEYS.ALLIES_IN_PARTY
+    );
+    characters.forEach((monster) => {
+      monster.currentHp = monster.maxHp;
+    });
+    dataManager.store.set(DATA_MANAGER_STORE_KEYS.ALLIES_IN_PARTY, characters);
   }
 }

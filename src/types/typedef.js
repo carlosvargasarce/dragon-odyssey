@@ -4,7 +4,7 @@
  * @property {Phaser.Scene} scene
  * @property {Character} characterDetails
  * @property {number} [scaleHealthBarBackgroundImageByY=1]
- * @property {boolean} [skipBattleAnimation=false]
+ * @property {boolean} [skipBattleAnimations=false]
  */
 
 import { ATTACK_KEYS } from '../battle/attacks/attack-keys.js';
@@ -14,21 +14,6 @@ import { ATTACK_KEYS } from '../battle/attacks/attack-keys.js';
  * @type {object}}
  * @property {number} id
  * @property {number} characterId
- * @property {string} name
- * @property {string} assetKey
- * @property {number} [assetFrame=0]
- * @property {number} currentLevel
- * @property {number} maxHp
- * @property {number} currentHp
- * @property {number} baseAttack
- * @property {number[]} attackIds
- */
-
-/**
- * @typedef Enemy
- * @type {object}}
- * @property {number} id
- * @property {number} enemyId
  * @property {string} name
  * @property {string} assetKey
  * @property {number} [assetFrame=0]
@@ -55,6 +40,26 @@ export const ITEM_EFFECT = Object.freeze({
  * @property {string} name the name of this item
  * @property {ItemEffect} effect the effect of using this item
  * @property {string} description the description of the item to show in the inventory bag
+ */
+
+/**
+ * @typedef BaseInventoryItem
+ * @type {object}
+ * @property {object} item
+ * @property {number} item.id the unique id of this item
+ * @property {number} quantity
+ */
+
+/**
+ * @typedef Inventory
+ * @type {BaseInventoryItem[]}
+ */
+
+/**
+ * @typedef InventoryItem
+ * @type {object}
+ * @property {Item} item
+ * @property {number} quantity
  */
 
 /**

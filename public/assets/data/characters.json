@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "characterId": 1,
+    "name": "BERSEKER",
+    "assetKey": "BERSEKER",
+    "assetFrame": 0,
+    "currentHp": 25,
+    "maxHp": 25,
+    "attackIds": [2],
+    "baseAttack": 15,
+    "currentLevel": 5
+  }
+]

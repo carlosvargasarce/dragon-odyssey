@@ -37,7 +37,7 @@ export class BattleCharacter {
     this._currentHealth = this._characterDetails.currentHp;
     this._maxHealth = this._characterDetails.maxHp;
     this._characterAttacks = [];
-    this._skipBattleAnimations = config.skipBattleAnimation || false;
+    this._skipBattleAnimations = config.skipBattleAnimations || false;
 
     this._phaserGameObject = SpriteFacade.createSprite(
       this._scene,
@@ -69,6 +69,11 @@ export class BattleCharacter {
         this._characterAttacks.push(characterAttack);
       }
     });
+  }
+
+  /** @type {number} */
+  get currentHp() {
+    return this._currentHealth;
   }
 
   /** @type {boolean}*/
@@ -110,7 +115,7 @@ export class BattleCharacter {
 
     this._healthBar.setMeterPercentageAnimated(
       this._currentHealth / this._maxHealth,
-      { callback }
+      { callback, skipBattleAnimations: this._skipBattleAnimations }
     );
   }
 

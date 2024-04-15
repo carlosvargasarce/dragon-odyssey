@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 //import { IceShard } from '../battle/attacks/ice-shard.js';
-import { ENEMY_ASSET_KEYS } from '../assets/asset-keys.js';
 import {
   ATTACK_TARGET,
   AttackManager,
@@ -12,6 +11,7 @@ import { BattleMenu } from '../battle/ui/menu/battle-menu.js';
 import { DIRECTION } from '../common/direction.js';
 import { BATTLE_SCENE_OPTIONS } from '../common/options.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
+import { DataUtils } from '../utils/data-utils.js';
 import { createSceneTransition } from '../utils/scene-transition.js';
 import { StateMachine } from '../utils/state-machine.js';
 import { BaseScene } from './base.js';
@@ -47,7 +47,7 @@ export default class Battle extends BaseScene {
   #activePlayerAttackIndex;
   /** @type  {StateMachine} */
   #battleStateMachine;
-  /** @type  {AttackManager}} */
+  /** @type  {AttackManager} */
   #attackManager;
   /** @type {boolean} */
   #skipAnimations;
@@ -66,9 +66,27 @@ export default class Battle extends BaseScene {
     });
   }
 
-  init() {
-    super.init();
+  /**
+   * @param {BattleSceneData} data
+   * @returns {void}
+   */
+  init(data) {
+    super.init(data);
+    this.#sceneData = data;
+
+    // Added for testing from preload scene
+    if (Object.keys(data).length === 0) {
+      this.#sceneData = {
+        enemyCharacters: [DataUtils.getEnemyById(this, 1)],
+        playerCharacters: [
+          dataManager.store.get(DATA_MANAGER_STORE_KEYS.ALLIES_IN_PARTY)[0],
+        ],
+      };
+    }
+
     this.#activePlayerAttackIndex = -1;
+    this.#activeEnemyAttackIndex = -1;
+    this.#activePlayerCharacterPartyIndex = 0;
 
     /** @type {import('../common/options.js').BattleSceneMenuOptions | undefined} */
     const chosenBattleSceneOption = dataManager.store.get(
@@ -94,19 +112,8 @@ export default class Battle extends BaseScene {
 
     let enemyPrototype = new EnemyBattleCharacter({
       scene: this,
-      characterDetails: {
-        id: 2,
-        characterId: 2,
-        name: ENEMY_ASSET_KEYS.FERNBITE,
-        assetKey: ENEMY_ASSET_KEYS.FERNBITE,
-        assetFrame: 0,
-        currentHp: 25,
-        maxHp: 25,
-        attackIds: [1],
-        baseAttack: 15,
-        currentLevel: 5,
-      },
-      skipBattleAnimation: false,
+      characterDetails: DataUtils.getEnemyById(this, 1),
+      skipBattleAnimations: this.#skipAnimations,
     });
 
     // Render out the player and enemy characters
@@ -119,7 +126,7 @@ export default class Battle extends BaseScene {
       characterDetails: dataManager.store.get(
         DATA_MANAGER_STORE_KEYS.ALLIES_IN_PARTY
       )[0],
-      skipBattleAnimation: this.#skipAnimations,
+      skipBattleAnimations: this.#skipAnimations,
     });
 
     // Render out the main info and sub info panes
@@ -142,6 +149,9 @@ export default class Battle extends BaseScene {
     // );
   }
 
+  /**
+   * @returns {void}
+   */
   update() {
     super.update();
 
@@ -179,6 +189,18 @@ export default class Battle extends BaseScene {
     if (wasSpaceKeyPressed) {
       this.#battleMenu.handlePlayerInput('OK');
 
+      // check if the player used an item
+      if (this.#battleMenu.wasItemUsed) {
+        this.#battleStateMachine.setState(BATTLE_STATES.ENEMY_INPUT);
+        return;
+      }
+
+      // check if the player attempted to flee
+      if (this.#battleMenu.isAttemptingToFlee) {
+        this.#battleStateMachine.setState(BATTLE_STATES.FLEE_ATTEMPT);
+        return;
+      }
+
       //Check if the player selected and attack, and update display text
       if (this.#battleMenu.selectedAttack === undefined) {
         return;
@@ -190,9 +212,9 @@ export default class Battle extends BaseScene {
         return;
       }
 
-      console.log(
-        `Player selected the following move: ${this.#battleMenu.selectedAttack}`
-      );
+      `Player selected the following move: ${
+        this.#activePlayerCharacter.attacks[this.#activePlayerAttackIndex].name
+      }`;
 
       this.#battleMenu.hideCharacterAttackSubMenu();
       this.#battleStateMachine.setState(BATTLE_STATES.ENEMY_INPUT);
@@ -205,12 +227,21 @@ export default class Battle extends BaseScene {
 
     const selectedDirection = this._controls.getDirectionKeyJustPressed();
 
-    if (selectedDirection != DIRECTION.NONE) {
+    if (selectedDirection !== DIRECTION.NONE) {
       this.#battleMenu.handlePlayerInput(selectedDirection);
     }
   }
 
-  #playerAttack() {
+  /**
+   * @param {() => void} callback
+   * @returns {void}
+   */
+  #playerAttack(callback) {
+    if (this.#activePlayerCharacter.isFainted) {
+      callback();
+      return;
+    }
+
     this.#battleMenu.updateInfoPaneMessagesNoInputRequired(
       `${this.#activePlayerCharacter.name} used ${
         this.#activePlayerCharacter.attacks[this.#activePlayerAttackIndex].name
@@ -226,7 +257,7 @@ export default class Battle extends BaseScene {
                 this.#activeEnemyCharacter.takeDamage(
                   this.#activePlayerCharacter.baseAttack,
                   () => {
-                    this.#enemyAttack();
+                    callback();
                   }
                 );
               });
@@ -237,29 +268,32 @@ export default class Battle extends BaseScene {
     );
   }
 
-  #enemyAttack() {
+  /**
+   * @param {() => void} callback
+   * @returns {void}
+   */
+  #enemyAttack(callback) {
     if (this.#activeEnemyCharacter.isFainted) {
-      this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+      callback();
       return;
     }
 
     this.#battleMenu.updateInfoPaneMessagesNoInputRequired(
       `for ${this.#activeEnemyCharacter.name} used ${
-        this.#activeEnemyCharacter.attacks[0].name
+        this.#activeEnemyCharacter.attacks[this.#activeEnemyAttackIndex].name
       }`,
       () => {
         this.time.delayedCall(500, () => {
           this.#attackManager.playAttackAnimation(
-            this.#activeEnemyCharacter.attacks[0].animationName,
+            this.#activeEnemyCharacter.attacks[this.#activeEnemyAttackIndex]
+              .animationName,
             ATTACK_TARGET.PLAYER,
             () => {
               this.#activePlayerCharacter.playTakeDamageAnimation(() => {
                 this.#activePlayerCharacter.takeDamage(
                   this.#activeEnemyCharacter.baseAttack,
                   () => {
-                    this.#battleStateMachine.setState(
-                      BATTLE_STATES.POST_ATTACK_CHECK
-                    );
+                    callback();
                   }
                 );
               });
@@ -271,6 +305,15 @@ export default class Battle extends BaseScene {
   }
 
   #postBattleSequenceCheck() {
+    // Update character details in scene data and data manager to align with changes from battle
+    this.#sceneData.playerCharacters[
+      this.#activePlayerCharacterPartyIndex
+    ].currentHp = this.#activePlayerCharacter.currentHp;
+    dataManager.store.set(
+      DATA_MANAGER_STORE_KEYS.ALLIES_IN_PARTY,
+      this.#sceneData.playerCharacters
+    );
+
     if (this.#activeEnemyCharacter.isFainted) {
       this.#activeEnemyCharacter.playDeathAnimation(() => {
         this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
@@ -295,6 +338,25 @@ export default class Battle extends BaseScene {
             'You have no more warriors, escaping to safety...',
           ],
           () => {
+            this.#playerKnockedOut = true;
+            this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
+          }
+        );
+      });
+      return;
+    }
+
+    if (this.#activePlayerCharacter.isFainted) {
+      // Play character fainted animation and wait for animation to finish
+      this.#activePlayerCharacter.playDeathAnimation(() => {
+        // TODO: this will need to be updated once we support multiple characters
+        this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
+          [
+            `${this.#activePlayerCharacter.name} fainted.`,
+            'You have no more characters, escaping to safety...',
+          ],
+          () => {
+            this.#playerKnockedOut = true;
             this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
           }
         );
@@ -306,11 +368,16 @@ export default class Battle extends BaseScene {
   }
 
   #transitionToNextScene() {
+    /** @type {import('./world.js').WorldSceneData} */
+    const sceneDataToPass = {
+      isPlayerKnockedOut: this.#playerKnockedOut,
+    };
+
     this.cameras.main.fadeOut(600, 0, 0, 0);
     this.cameras.main.once(
       Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
       () => {
-        this.scene.start(SCENE_KEYS.WORLD_SCENE);
+        this.scene.start(SCENE_KEYS.WORLD_SCENE, sceneDataToPass);
       }
     );
   }
@@ -386,7 +453,8 @@ export default class Battle extends BaseScene {
       onEnter: () => {
         //TODO: Add feature in the future update
         // Pick a randome move fro the enemy monser, and in the future implement some type of AI behavor
-
+        this.#activeEnemyAttackIndex =
+          this.#activeEnemyCharacter.pickRandomMove();
         this.#battleStateMachine.setState(BATTLE_STATES.BATTLE);
       },
     });
@@ -394,8 +462,53 @@ export default class Battle extends BaseScene {
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.BATTLE,
       onEnter: () => {
-        // General battle flow
-        this.#playerAttack();
+        // if item was used, only have enemy attack
+        if (this.#battleMenu.wasItemUsed) {
+          // TODO: enhance once we support multiple monsters
+          this.#activePlayerCharacter.updateMonsterHealth(
+            /** @type {import('../types/typedef.js').Character[]} */ (
+              dataManager.store.get(DATA_MANAGER_STORE_KEYS.ALLIES_IN_PARTY)
+            )[0].currentHp
+          );
+          this.time.delayedCall(500, () => {
+            this.#enemyAttack(() => {
+              this.#battleStateMachine.setState(
+                BATTLE_STATES.POST_ATTACK_CHECK
+              );
+            });
+          });
+          return;
+        }
+
+        // if player failed to flee, only have enemy attack
+        if (this.#battleMenu.isAttemptingToFlee) {
+          this.time.delayedCall(500, () => {
+            this.#enemyAttack(() => {
+              this.#battleStateMachine.setState(
+                BATTLE_STATES.POST_ATTACK_CHECK
+              );
+            });
+          });
+          return;
+        }
+
+        const randomNumber = Phaser.Math.Between(0, 1);
+        if (randomNumber === 0) {
+          this.#playerAttack(() => {
+            this.#enemyAttack(() => {
+              this.#battleStateMachine.setState(
+                BATTLE_STATES.POST_ATTACK_CHECK
+              );
+            });
+          });
+          return;
+        }
+
+        this.#enemyAttack(() => {
+          this.#playerAttack(() => {
+            this.#battleStateMachine.setState(BATTLE_STATES.POST_ATTACK_CHECK);
+          });
+        });
       },
     });
 
@@ -416,10 +529,27 @@ export default class Battle extends BaseScene {
     this.#battleStateMachine.addState({
       name: BATTLE_STATES.FLEE_ATTEMPT,
       onEnter: () => {
+        const randomNumber = Phaser.Math.Between(1, 10);
+        if (randomNumber > 5) {
+          // Player has run away successfully
+          this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
+            ['You got away safely!'],
+            () => {
+              this.time.delayedCall(200, () => {
+                // PlaySoundFx(this, AUDIO_ASSET_KEYS.FLEE);
+                this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
+              });
+            }
+          );
+          return;
+        }
+        // Player failed to run away, allow enemy to take their turn
         this.#battleMenu.updateInfoPaneMessagesAndWaitForInput(
-          [`You got away safely!`],
+          ['You failed to run away...'],
           () => {
-            this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
+            this.time.delayedCall(200, () => {
+              this.#battleStateMachine.setState(BATTLE_STATES.ENEMY_INPUT);
+            });
           }
         );
       },
