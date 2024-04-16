@@ -8,6 +8,8 @@ import {
   DATA_ASSET_KEYS,
   ENEMY_ASSET_KEYS,
   HEALTH_BAR_ASSET_KEYS,
+  HISTORY_ASSET_KEYS,
+  INVENTORY_ASSET_KEYS,
   OPTIONS_ASSET_KEYS,
   TITLE_ASSET_KEYS,
   UI_ASSET_KEYS,
@@ -110,6 +112,11 @@ export default class PreLoader extends BaseScene {
     );
 
     this.load.image(
+      UI_ASSET_KEYS.MENU_BACKGROUND_SQUARE,
+      `${dragonOdysseyAssetPath}/title/glass_panel_square.png`
+    );
+
+    this.load.image(
       UI_ASSET_KEYS.MENU_BACKGROUND_BLUE,
       `${dragonOdysseyAssetPath}/title/glass_panel_blue.png`
     );
@@ -143,6 +150,9 @@ export default class PreLoader extends BaseScene {
     // Load JSON Data
     this.load.json(DATA_ASSET_KEYS.ATTACKS, 'assets/data/attacks.json');
     this.load.json(DATA_ASSET_KEYS.ANIMATIONS, 'assets/data/animations.json');
+    this.load.json(DATA_ASSET_KEYS.ITEMS, 'assets/data/items.json');
+    this.load.json(DATA_ASSET_KEYS.ENEMIES, 'assets/data/enemies.json');
+    this.load.json(DATA_ASSET_KEYS.CHARACTERS, 'assets/data/characters.json');
 
     // Load Custom Fonts
     this.load.addFile(
@@ -234,13 +244,31 @@ export default class PreLoader extends BaseScene {
       OPTIONS_ASSET_KEYS.BACKGROUNDS,
       `${dragonOdysseyAssetPath}/options/background.jpg`
     );
+
+    // Inventory Assets
+    this.load.image(
+      INVENTORY_ASSET_KEYS.INVENTORY_BACKGROUND,
+      `${dragonOdysseyAssetPath}/inventory/bag_background.png`
+    );
+    this.load.image(
+      INVENTORY_ASSET_KEYS.INVENTORY_BAG,
+      `${dragonOdysseyAssetPath}/inventory/bag.png`
+    );
+
+    // History Scenes Assets
+    this.load.image(
+      HISTORY_ASSET_KEYS.HISTORY_1,
+      `${dragonOdysseyAssetPath}/history/history-1.png`
+    );
   }
 
   create() {
     super.create();
     this.#createAnimations();
+
+    dataManager.init(this);
     dataManager.loadData();
-    this.scene.start(SCENE_KEYS.WORLD_SCENE);
+    this.scene.start(SCENE_KEYS.TITLE_SCENE);
   }
 
   #createAnimations() {

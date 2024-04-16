@@ -120,11 +120,18 @@ export class EnemyBattleCharacter extends BattleCharacter {
     });
   }
 
+  /**
+   * @returns {number}
+   */
+  pickRandomMove() {
+    return Phaser.Math.Between(0, this._characterAttacks.length - 1);
+  }
+
   clone() {
     return new EnemyBattleCharacter({
       scene: this._scene,
       characterDetails: { ...this._characterDetails },
-      skipBattleAnimation: this._skipBattleAnimations,
+      skipBattleAnimations: this._skipBattleAnimations,
     });
   }
 }

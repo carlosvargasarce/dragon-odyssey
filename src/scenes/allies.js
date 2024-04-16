@@ -10,6 +10,7 @@ import { DIRECTION } from '../common/direction.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import SpriteFacade from '../utils/spriteFacade.js';
 // import { BaseScene } from './base-scene.js';
+import { ITEM_EFFECT } from '../types/typedef.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { BaseScene } from './base.js';
 import { SCENE_KEYS } from './scene-keys.js';
@@ -180,17 +181,17 @@ export default class CharacterPartyScene extends BaseScene {
         return;
       }
 
-      // handle input based on what player intention was (use item, view character details, select character to switch to)
-      // if (
-      //   this.#sceneData.previousSceneName === SCENE_KEYS.INVENTORY_SCENE &&
-      //   this.#sceneData.itemSelected
-      // ) {
-      //   this.#handleItemUsed();
-      //   return;
-      // }
+      // Handle input based on what player intention was (use item, view character details, select character to switch to)
+      if (
+        this.#sceneData.previousSceneName === SCENE_KEYS.INVENTORY_SCENE &&
+        this.#sceneData.itemSelected
+      ) {
+        this.#handleItemUsed();
+        return;
+      }
 
       this._controls.lockInput = true;
-      // pause this scene and launch the character details scene
+      // Pause this scene and launch the character details scene
       /** @type {import('./details.js').CharacterDetailsSceneData} */
       const sceneDataToPass = {
         character: this.#allies[this.#selectedPartyCharacterIndex],
@@ -362,12 +363,12 @@ export default class CharacterPartyScene extends BaseScene {
   #movePlayerInputCursor(direction) {
     switch (direction) {
       case DIRECTION.UP:
-        // if we are already at the cancel button, then reset index
+        // If we are already at the cancel button, then reset index
         if (this.#selectedPartyCharacterIndex === -1) {
           this.#selectedPartyCharacterIndex = this.#allies.length;
         }
         this.#selectedPartyCharacterIndex -= 1;
-        // prevent from looping to the bottom
+        // Prevent from looping to the bottom
         if (this.#selectedPartyCharacterIndex < 0) {
           this.#selectedPartyCharacterIndex = 0;
         }
@@ -379,11 +380,11 @@ export default class CharacterPartyScene extends BaseScene {
           .setAlpha(0.7);
         break;
       case DIRECTION.DOWN:
-        // already at the bottom of the menu
+        // Already at the bottom of the menu
         if (this.#selectedPartyCharacterIndex === -1) {
           break;
         }
-        // increment index and check if we are pass the threshold
+        // Increment index and check if we are pass the threshold
         this.#selectedPartyCharacterIndex += 1;
         if (this.#selectedPartyCharacterIndex > this.#allies.length - 1) {
           this.#selectedPartyCharacterIndex = -1;
@@ -417,62 +418,72 @@ export default class CharacterPartyScene extends BaseScene {
   /**
    * @returns {void}
    */
-  // #handleItemUsed() {
-  //   switch (this.#sceneData.itemSelected.effect) {
-  //     case ITEM_EFFECT.HEAL_30:
-  //       this.#handleHealItemUsed(30);
-  //       break;
-  //     default:
-  //       exhaustiveGuard(this.#sceneData.itemSelected.effect);
-  //   }
-  // }
+  #handleItemUsed() {
+    switch (this.#sceneData.itemSelected.effect) {
+      case ITEM_EFFECT.HEAL_30:
+        this.#handleHealItemUsed(30);
+        break;
+      default:
+        exhaustiveGuard(this.#sceneData.itemSelected.effect);
+    }
+  }
 
   /**
    * @param {number} amount the amount of health to heal the character by
    * @returns {void}
    */
-  // #handleHealItemUsed(amount) {
-  //   // validate that the character is not fainted
-  //   if (this.#allies[this.#selectedPartyCharacterIndex].currentHp === 0) {
-  //     this.#infoTextGameObject.setText('Cannot heal fainted character');
-  //     this.#waitingForInput = true;
-  //     return;
-  //   }
+  #handleHealItemUsed(amount) {
+    // Validate that the character is not fainted
+    if (this.#allies[this.#selectedPartyCharacterIndex].currentHp === 0) {
+      this.#infoTextGameObject.setText('Cannot heal fainted character');
+      this.#waitingForInput = true;
+      return;
+    }
 
-  //   // validate that the character is not already fully healed
-  //   if (
-  //     this.#allies[this.#selectedPartyCharacterIndex].currentHp ===
-  //     this.#allies[this.#selectedPartyCharacterIndex].maxHp
-  //   ) {
-  //     this.#infoTextGameObject.setText('Character is already fully healed');
-  //     this.#waitingForInput = true;
-  //     return;
-  //   }
+    // Validate that the character is not already fully healed
+    if (
+      this.#allies[this.#selectedPartyCharacterIndex].currentHp ===
+      this.#allies[this.#selectedPartyCharacterIndex].maxHp
+    ) {
+      this.#infoTextGameObject.setText('Character is already fully healed');
+      this.#waitingForInput = true;
+      return;
+    }
 
-  //   // otherwise, heal character by the amount if we are not in a battle and show animation
-  //   this._controls.lockInput = true;
-  //   this.#allies[this.#selectedPartyCharacterIndex].currentHp += amount;
-  //   if (
-  //     this.#allies[this.#selectedPartyCharacterIndex].currentHp > this.#allies[this.#selectedPartyCharacterIndex].maxHp
-  //   ) {
-  //     this.#allies[this.#selectedPartyCharacterIndex].currentHp = this.#allies[this.#selectedPartyCharacterIndex].maxHp;
-  //   }
-  //   this.#infoTextGameObject.setText(`Healed character by ${amount} HP`);
-  //   this.#healthBars[this.#selectedPartyCharacterIndex].setMeterPercentageAnimated(
-  //     this.#allies[this.#selectedPartyCharacterIndex].currentHp / this.#allies[this.#selectedPartyCharacterIndex].maxHp,
-  //     {
-  //       callback: () => {
-  //         this.#healthBarTextGameObjects[this.#selectedPartyCharacterIndex].setText(
-  //           `${this.#allies[this.#selectedPartyCharacterIndex].currentHp} / ${
-  //             this.#allies[this.#selectedPartyCharacterIndex].maxHp
-  //           }`
-  //         );
-  //         dataManager.store.set(DATA_MANAGER_STORE_KEYS.ALLIES_IN_PARTY, this.#allies);
-  //         this.time.delayedCall(300, () => {
-  //           this.#goBackToPreviousScene(true);
-  //         });
-  //       },
-  //     }
-  //   );
-  // }
+    // Otherwise, heal character by the amount if we are not in a battle and show animation
+    this._controls.lockInput = true;
+    this.#allies[this.#selectedPartyCharacterIndex].currentHp += amount;
+    if (
+      this.#allies[this.#selectedPartyCharacterIndex].currentHp >
+      this.#allies[this.#selectedPartyCharacterIndex].maxHp
+    ) {
+      this.#allies[this.#selectedPartyCharacterIndex].currentHp =
+        this.#allies[this.#selectedPartyCharacterIndex].maxHp;
+    }
+    this.#infoTextGameObject.setText(`Healed character by ${amount} HP`);
+    this.#healthBars[
+      this.#selectedPartyCharacterIndex
+    ].setMeterPercentageAnimated(
+      this.#allies[this.#selectedPartyCharacterIndex].currentHp /
+        this.#allies[this.#selectedPartyCharacterIndex].maxHp,
+      {
+        callback: () => {
+          this.#healthBarTextGameObjects[
+            this.#selectedPartyCharacterIndex
+          ].setText(
+            `${this.#allies[this.#selectedPartyCharacterIndex].currentHp} / ${
+              this.#allies[this.#selectedPartyCharacterIndex].maxHp
+            }`
+          );
+          dataManager.store.set(
+            DATA_MANAGER_STORE_KEYS.ALLIES_IN_PARTY,
+            this.#allies
+          );
+          this.time.delayedCall(300, () => {
+            this.#goBackToPreviousScene(true);
+          });
+        },
+      }
+    );
+  }
 }

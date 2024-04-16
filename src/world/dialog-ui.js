@@ -36,16 +36,16 @@ export class DialogUi {
   /** @type {string[]} */
   #messagesToShow;
 
-  constructor(scene, width) {
+  constructor(scene, width, padding, height, alpha) {
     this.#scene = scene;
-    this.#padding = 90;
+    this.#padding = padding;
     this.#width = width - this.#padding * 2;
-    this.#height = 124;
+    this.#height = height;
     this.#textAnimationPlaying = false;
     this.#messagesToShow = [];
 
     const panel = this.#scene.add
-      .rectangle(0, 0, this.#width, this.#height, 0x000000, 0.9)
+      .rectangle(0, 0, this.#width, this.#height, 0x000000, alpha)
       .setOrigin(0);
     this.#container = this.#scene.add.container(0, 0, [panel]);
     this.#uiText = this.#scene.add.text(24, 28, CANNOT_READ_SIGN_TEXT, {
@@ -57,9 +57,29 @@ export class DialogUi {
     this.hideDialogModal();
   }
 
+  /** @type {Phaser.Tweens.Tween} */
+  get userInputCursorTween() {
+    return this.#userInputCursorTween;
+  }
+
+  /** @type {Phaser.Scene} */
+  get scene() {
+    return this.#scene;
+  }
+
+  /** @type {Phaser.GameObjects.Container} */
+  get container() {
+    return this.#container;
+  }
+
   /** @type {boolean} */
   get isVisible() {
     return this.#isVisible;
+  }
+
+  /** @param {boolean} val the value that will be assigned */
+  set isVisible(val) {
+    this.#isVisible = val;
   }
 
   /** @type {boolean} */

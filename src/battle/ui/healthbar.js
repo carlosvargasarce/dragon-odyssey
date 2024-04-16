@@ -126,7 +126,7 @@ export class Healthbar {
     const width = this.#fullWidth * percent;
 
     this.#middle.displayWidth = width;
-    this.#rightCap.x = this.#middle.x + this.#middle.displayWidth;
+    this.#updateHealthBarGameObjects();
   }
 
   #updateHealthBarGameObjects() {
@@ -147,6 +147,14 @@ export class Healthbar {
    */
   setMeterPercentageAnimated(percent, options) {
     const width = this.#fullWidth * percent;
+
+    if (options?.skipBattleAnimations) {
+      this.#setMeterPercentage(percent);
+      if (options?.callback) {
+        options.callback();
+      }
+      return;
+    }
 
     this.#scene.tweens.add({
       targets: this.#middle,
