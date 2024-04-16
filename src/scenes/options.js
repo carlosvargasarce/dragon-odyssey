@@ -8,6 +8,7 @@ import {
   SOUND_OPTIONS,
   TEXT_SPEED_OPTIONS,
 } from '../common/options.js';
+import { setGlobalSoundSettings } from '../utils/audio-utils.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { NineSlice } from '../utils/nine-slice.js';
@@ -288,6 +289,7 @@ export default class OptionsScene extends BaseScene {
     ) {
       this._controls.lockInput = true;
       this.#updateOptionDataInDataManager();
+      setGlobalSoundSettings(this);
       this.cameras.main.fadeOut(500, 0, 0, 0);
       return;
     }

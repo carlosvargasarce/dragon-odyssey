@@ -1,4 +1,5 @@
 import { LATO_FONT_NAME } from '../../assets/font-keys.js';
+import EventManager from '../../utils/event-manager.js';
 import { BattleCharacter } from './battle-character.js';
 
 /**
@@ -26,6 +27,7 @@ export class PlayerBattleCharacter extends BattleCharacter {
       SCALE
     );
     this._phaserHealthBarGameContainer.setPosition(553, 325);
+    this.eventManager = new EventManager();
 
     this.#addHealthBarComponents();
   }
@@ -55,7 +57,17 @@ export class PlayerBattleCharacter extends BattleCharacter {
    */
   takeDamage(damage, callback) {
     super.takeDamage(damage, callback);
+    this.updateHealth(this._currentHealth);
     this.#setHealthBarText();
+  }
+
+  updateHealth(newHealth) {
+    this._currentHealth = newHealth;
+    this.eventManager.notify('healthUpdated', { health: newHealth });
+
+    if (newHealth <= this._maxHealth * 0.3) {
+      this.eventManager.notify('healthCritical', { health: newHealth });
+    }
   }
 
   /**

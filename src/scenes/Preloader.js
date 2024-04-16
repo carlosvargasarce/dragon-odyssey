@@ -1,6 +1,7 @@
 import {
   ALLIES_ASSET_KEYS,
   ATTACK_ASSET_KEYS,
+  AUDIO_ASSET_KEYS,
   BATTLE_ASSET_KEYS,
   BATTLE_BACKGROUND_ASSET_KEYS,
   CHARACTER_ENTITY_ASSET_KEYS,
@@ -17,6 +18,7 @@ import {
 } from '../assets/asset-keys.js';
 import { FUGAZ_ONE_FONT_NAME, LATO_FONT_NAME } from '../assets/font-keys.js';
 import { WebFontFileLoader } from '../assets/web-font-file-loader.js';
+import { setGlobalSoundSettings } from '../utils/audio-utils.js';
 import { dataManager } from '../utils/data-manager.js';
 import { DataUtils } from '../utils/data-utils.js';
 import { BaseScene } from './base.js';
@@ -135,6 +137,18 @@ export default class PreLoader extends BaseScene {
       UI_ASSET_KEYS.RED_BUTTON_SELECTED,
       `${dragonOdysseyAssetPath}/ui/red_button_selected.png`
     );
+
+    // Audio Assets
+    this.load.audio(AUDIO_ASSET_KEYS.MAIN, 'assets/audio/journey-begins.wav');
+    this.load.audio(AUDIO_ASSET_KEYS.TITLE, 'assets/audio/title-theme.wav');
+    this.load.audio(
+      AUDIO_ASSET_KEYS.BATTLE,
+      'assets/audio/decisive-battle.wav'
+    );
+    this.load.audio(AUDIO_ASSET_KEYS.GRASS, 'assets/audio/step-grass.wav');
+    this.load.audio(AUDIO_ASSET_KEYS.ICE, 'assets/audio/ice-explosion.wav');
+    this.load.audio(AUDIO_ASSET_KEYS.FLEE, 'assets/audio/flee.wav');
+    this.load.audio(AUDIO_ASSET_KEYS.CLAW, 'assets/audio/claw.wav');
 
     // Allies Scene Assets
     this.load.image(
@@ -268,6 +282,8 @@ export default class PreLoader extends BaseScene {
 
     dataManager.init(this);
     dataManager.loadData();
+
+    setGlobalSoundSettings(this);
     this.scene.start(SCENE_KEYS.TITLE_SCENE);
   }
 

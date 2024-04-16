@@ -88,3 +88,13 @@ export const INVENTORY_ASSET_KEYS = Object.freeze({
 export const HISTORY_ASSET_KEYS = Object.freeze({
   HISTORY_1: 'HISTORY_1',
 });
+
+export const AUDIO_ASSET_KEYS = Object.freeze({
+  TITLE: 'TITLE',
+  BATTLE: 'BATTLE',
+  MAIN: 'MAIN',
+  GRASS: 'GRASS',
+  CLAW: 'CLAW',
+  ICE: 'ICE',
+  FLEE: 'FLEE',
+});

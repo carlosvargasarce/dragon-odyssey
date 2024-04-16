@@ -1,6 +1,11 @@
-import { TITLE_ASSET_KEYS, UI_ASSET_KEYS } from '../assets/asset-keys.js';
+import {
+  AUDIO_ASSET_KEYS,
+  TITLE_ASSET_KEYS,
+  UI_ASSET_KEYS,
+} from '../assets/asset-keys.js';
 import { LATO_FONT_NAME } from '../assets/font-keys.js';
 import { DIRECTION } from '../common/direction.js';
+import { playBackgroundMusic } from '../utils/audio-utils.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { exhaustiveGuard } from '../utils/guard.js';
 import { NineSlice } from '../utils/nine-slice.js';
@@ -148,6 +153,8 @@ export default class TitleScene extends BaseScene {
         this.scene.start(SCENE_KEYS.HISTORY_1_SCENE);
       }
     );
+
+    playBackgroundMusic(this, AUDIO_ASSET_KEYS.TITLE);
   }
 
   update() {

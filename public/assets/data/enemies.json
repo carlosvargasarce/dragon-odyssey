@@ -5,10 +5,10 @@
     "name": "FERNBITE",
     "assetKey": "FERNBITE",
     "assetFrame": 0,
-    "currentHp": 25,
-    "maxHp": 25,
+    "currentHp": 100,
+    "maxHp": 100,
     "attackIds": [1],
-    "baseAttack": 25,
+    "baseAttack": 20,
     "currentLevel": 5
   },
   {
