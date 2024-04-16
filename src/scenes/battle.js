@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 //import { IceShard } from '../battle/attacks/ice-shard.js';
+import { AUDIO_ASSET_KEYS } from '../assets/asset-keys.js';
 import {
   ATTACK_TARGET,
   AttackManager,
@@ -10,6 +11,7 @@ import { PlayerBattleCharacter } from '../battle/characters/player-battle-charac
 import { BattleMenu } from '../battle/ui/menu/battle-menu.js';
 import { DIRECTION } from '../common/direction.js';
 import { BATTLE_SCENE_OPTIONS } from '../common/options.js';
+import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { DataUtils } from '../utils/data-utils.js';
 import { createSceneTransition } from '../utils/scene-transition.js';
@@ -106,6 +108,14 @@ export default class Battle extends BaseScene {
   create() {
     super.create();
 
+    // Create a red rectangle that covers the entire screen
+    this.redFlashGraphics = this.add.graphics({
+      fillStyle: { color: 0xff0000, alpha: 0.3 },
+    });
+    this.redFlashGraphics.fillRect(0, 0, this.scale.width, this.scale.height);
+    this.redFlashGraphics.setDepth(100); // Ensure it's on top of other game objects
+    this.redFlashGraphics.setVisible(false); // Start invisible
+
     // Create main background
     const background = new Background(this);
     background.showMeadow();
@@ -129,6 +139,12 @@ export default class Battle extends BaseScene {
       skipBattleAnimations: this.#skipAnimations,
     });
 
+    //Listen for health events
+    this.#activePlayerCharacter.eventManager.subscribe(
+      'healthCritical',
+      this.onHealthCritical.bind(this)
+    );
+
     // Render out the main info and sub info panes
     this.#battleMenu = new BattleMenu(
       this,
@@ -147,6 +163,29 @@ export default class Battle extends BaseScene {
     // this.enterKey = this.input.keyboard.addKey(
     //   Phaser.Input.Keyboard.KeyCodes.ENTER
     // );
+    playBackgroundMusic(this, AUDIO_ASSET_KEYS.BATTLE);
+  }
+
+  onHealthCritical(data) {
+    this.flashRedAnimation();
+    console.log(`Alert! Health is critical at ${data.health} points.`);
+  }
+
+  flashRedAnimation() {
+    // Make the graphics visible and start a flashing effect
+    this.redFlashGraphics.setVisible(true);
+    this.tweens.add({
+      targets: this.redFlashGraphics,
+      alpha: 0, // Fade to invisible
+      ease: 'Cubic.easeInOut', // Smooth transition
+      duration: 300,
+      repeat: 1, // Number of flashes
+      yoyo: true, // Make it fade back in
+      onComplete: () => {
+        this.redFlashGraphics.setVisible(false);
+        this.redFlashGraphics.alpha = 0.5; // Reset alpha after animation
+      },
+    });
   }
 
   /**
@@ -248,6 +287,13 @@ export default class Battle extends BaseScene {
       }`,
       () => {
         this.time.delayedCall(500, () => {
+          this.time.delayedCall(100, () => {
+            playSoundFx(
+              this,
+              this.#activePlayerCharacter.attacks[this.#activePlayerAttackIndex]
+                .audioKey
+            );
+          });
           this.#attackManager.playAttackAnimation(
             this.#activePlayerCharacter.attacks[this.#activePlayerAttackIndex]
               .animationName,
@@ -284,6 +330,13 @@ export default class Battle extends BaseScene {
       }`,
       () => {
         this.time.delayedCall(500, () => {
+          this.time.delayedCall(100, () => {
+            playSoundFx(
+              this,
+              this.#activeEnemyCharacter.attacks[this.#activeEnemyAttackIndex]
+                .audioKey
+            );
+          });
           this.#attackManager.playAttackAnimation(
             this.#activeEnemyCharacter.attacks[this.#activeEnemyAttackIndex]
               .animationName,
@@ -536,7 +589,7 @@ export default class Battle extends BaseScene {
             ['You got away safely!'],
             () => {
               this.time.delayedCall(200, () => {
-                // PlaySoundFx(this, AUDIO_ASSET_KEYS.FLEE);
+                playSoundFx(this, AUDIO_ASSET_KEYS.FLEE);
                 this.#battleStateMachine.setState(BATTLE_STATES.FINISHED);
               });
             }

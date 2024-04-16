@@ -1,6 +1,7 @@
-import { WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
+import { AUDIO_ASSET_KEYS, WORLD_ASSET_KEYS } from '../assets/asset-keys.js';
 import { DIRECTION } from '../common/direction.js';
 import { TILE_COLLISION_LAYER_ALPHA, TILE_SIZE } from '../config.js';
+import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { DataUtils } from '../utils/data-utils.js';
 import { getTargetPositionFromGameObjectPositionAndDirection } from '../utils/grid-utils.js';
@@ -227,6 +228,8 @@ export default class WorldScene extends BaseScene {
     });
 
     dataManager.store.set(DATA_MANAGER_STORE_KEYS.GAME_STARTED, true);
+
+    playBackgroundMusic(this, AUDIO_ASSET_KEYS.MAIN);
   }
 
   /**
@@ -425,6 +428,9 @@ export default class WorldScene extends BaseScene {
     console.log(
       `[${WorldScene.name}:handlePlayerMovementUpdate] player is in a encounter zone`
     );
+
+    playSoundFx(this, AUDIO_ASSET_KEYS.GRASS);
+
     this.#wildEnemyEncountered = Math.random() < 0.2;
 
     if (this.#wildEnemyEncountered) {

@@ -2,11 +2,13 @@
   {
     "id": 1,
     "name": "Ice Shard",
-    "animationName": "ICE_SHARD"
+    "animationName": "ICE_SHARD",
+    "audioKey": "ICE"
   },
   {
     "id": 2,
     "name": "Slash",
-    "animationName": "SLASH"
+    "animationName": "SLASH",
+    "audioKey": "CLAW"
   }
 ]

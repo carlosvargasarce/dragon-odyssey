@@ -75,6 +75,7 @@ export const ITEM_EFFECT = Object.freeze({
  * @property {number} id
  * @property {string} name
  * @property {ATTACK_KEYS} animationName
+ * @property {string} audioKey
  */
 
 /**
