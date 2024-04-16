@@ -1,6 +1,7 @@
 import Allies from './scenes/allies.js';
 import Battle from './scenes/battle.js';
 import Details from './scenes/details.js';
+import History1 from './scenes/history-1.js';
 import Inventory from './scenes/inventory.js';
 import Options from './scenes/options.js';
 import Preloader from './scenes/preloader.js';
@@ -29,6 +30,7 @@ const config = {
     Allies,
     Details,
     Inventory,
+    History1,
   ],
 };
 

@@ -8,6 +8,7 @@ import {
   DATA_ASSET_KEYS,
   ENEMY_ASSET_KEYS,
   HEALTH_BAR_ASSET_KEYS,
+  HISTORY_ASSET_KEYS,
   INVENTORY_ASSET_KEYS,
   OPTIONS_ASSET_KEYS,
   TITLE_ASSET_KEYS,
@@ -252,6 +253,12 @@ export default class PreLoader extends BaseScene {
     this.load.image(
       INVENTORY_ASSET_KEYS.INVENTORY_BAG,
       `${dragonOdysseyAssetPath}/inventory/bag.png`
+    );
+
+    // History Scenes Assets
+    this.load.image(
+      HISTORY_ASSET_KEYS.HISTORY_1,
+      `${dragonOdysseyAssetPath}/history/history-1.png`
     );
   }
 

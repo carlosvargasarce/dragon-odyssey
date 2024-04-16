@@ -208,7 +208,7 @@ export default class WorldScene extends BaseScene {
     ).setOrigin(0);
 
     // Create Dialog UI
-    this.#dialogUi = new DialogUi(this, 1280);
+    this.#dialogUi = new DialogUi(this, 1280, 90, 124, 0.9);
 
     // Create menu
     this.#menu = new Menu(this);

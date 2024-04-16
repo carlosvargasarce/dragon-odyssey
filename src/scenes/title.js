@@ -145,7 +145,7 @@ export default class TitleScene extends BaseScene {
           dataManager.startNewGame(this);
         }
 
-        this.scene.start(SCENE_KEYS.WORLD_SCENE);
+        this.scene.start(SCENE_KEYS.HISTORY_1_SCENE);
       }
     );
   }

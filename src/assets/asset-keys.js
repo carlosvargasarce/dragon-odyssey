@@ -84,3 +84,7 @@ export const INVENTORY_ASSET_KEYS = Object.freeze({
   INVENTORY_BACKGROUND: 'INVENTORY_BACKGROUND',
   INVENTORY_BAG: 'INVENTORY_BAG',
 });
+
+export const HISTORY_ASSET_KEYS = Object.freeze({
+  HISTORY_1: 'HISTORY_1',
+});
