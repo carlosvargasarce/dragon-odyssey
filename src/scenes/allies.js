@@ -420,8 +420,8 @@ export default class CharacterPartyScene extends BaseScene {
    */
   #handleItemUsed() {
     switch (this.#sceneData.itemSelected.effect) {
-      case ITEM_EFFECT.HEAL_30:
-        this.#handleHealItemUsed(30);
+      case ITEM_EFFECT.HEAL_120:
+        this.#handleHealItemUsed(120);
         break;
       default:
         exhaustiveGuard(this.#sceneData.itemSelected.effect);

@@ -5,7 +5,7 @@ import { DialogUi } from '../world/dialog-ui.js';
 import { BaseScene } from './base.js';
 import { SCENE_KEYS } from './scene-keys.js';
 
-export default class History1Scene extends BaseScene {
+export default class History2Scene extends BaseScene {
   /** @type {DialogUi} */
   #dialogUi;
   /** @type {number} */
@@ -13,7 +13,7 @@ export default class History1Scene extends BaseScene {
 
   constructor() {
     super({
-      key: SCENE_KEYS.HISTORY_1_SCENE,
+      key: SCENE_KEYS.HISTORY_2_SCENE,
     });
     this.#counter = 0;
   }
@@ -28,8 +28,10 @@ export default class History1Scene extends BaseScene {
     SpriteFacade.createSprite(
       this,
       { x: 0, y: 0 },
-      { assetKey: HISTORY_ASSET_KEYS.HISTORY_1 }
-    ).setOrigin(0);
+      { assetKey: HISTORY_ASSET_KEYS.HISTORY_2 }
+    )
+      .setOrigin(0)
+      .setScale(0.432);
 
     //this.#dialogUi = new DialogUi(this, 1024, 0, 124, 0.5);
 
@@ -45,7 +47,7 @@ export default class History1Scene extends BaseScene {
         Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
         () => {
           console.log('Fade out complete, changing scene');
-          this.scene.start(SCENE_KEYS.HISTORY_2_SCENE);
+          this.scene.start(SCENE_KEYS.HISTORY_3_SCENE);
         }
       );
     });
@@ -94,9 +96,9 @@ export default class History1Scene extends BaseScene {
     console.log('Start of interaction check');
 
     this.#dialogUi.showDialogModal([
-      'A long time ago, in the eastern sea, the Kingdom of Elendel emerged, an oasis of peace under the benevolent rule of King Homero.',
-      'His just reign, prosperous and equitable, inspired admiration and envy. In the shadows, treason and greed conspired a dark plan.',
-      'In a moment of vulnerability, Maluf, the ambitious wizard, seized the throne, initiating an era of hardships.',
+      'Upon returning, Homer and his loyal followers faced Maluf in an epic battle, which would culminate in a mortal wound for the king.',
+      'With his last strength, Homer sought Gartok the dragons aid, who attacked the usurper. Yet, Malufs dark magic corrupted Gartok.',
+      'The earth shook, swallowing the kingdoms glory. Witnessing druids sacrificed themselves to invoke ancient magic and contain the evil.',
     ]);
   }
 
@@ -106,7 +108,7 @@ export default class History1Scene extends BaseScene {
       Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
       () => {
         console.log('Fade out complete, changing scene');
-        this.scene.start(SCENE_KEYS.HISTORY_2_SCENE);
+        this.scene.start(SCENE_KEYS.HISTORY_3_SCENE);
       }
     );
   }
