@@ -5,10 +5,10 @@
     "name": "FERNBITE",
     "assetKey": "FERNBITE",
     "assetFrame": 0,
-    "currentHp": 25,
-    "maxHp": 25,
+    "currentHp": 900,
+    "maxHp": 900,
     "attackIds": [3],
-    "baseAttack": 6,
+    "baseAttack": 150,
     "currentLevel": 1
   },
   {
@@ -17,10 +17,10 @@
     "name": "VESPERWING",
     "assetKey": "VESPERWING",
     "assetFrame": 0,
-    "currentHp": 20,
-    "maxHp": 20,
+    "currentHp": 700,
+    "maxHp": 700,
     "attackIds": [1],
-    "baseAttack": 7,
+    "baseAttack": 100,
     "currentLevel": 1
   }
 ]

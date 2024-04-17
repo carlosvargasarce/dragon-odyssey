@@ -102,6 +102,31 @@ export default class PreLoader extends BaseScene {
       `${dragonOdysseyAssetPath}/classes/berseker.png`
     );
 
+    this.load.image(
+      CLASSES_ASSET_KEYS.ELF,
+      `${dragonOdysseyAssetPath}/classes/elf.png`
+    );
+
+    this.load.image(
+      CLASSES_ASSET_KEYS.DRUID,
+      `${dragonOdysseyAssetPath}/classes/druid.png`
+    );
+
+    this.load.image(
+      CLASSES_ASSET_KEYS.WARRIOR,
+      `${dragonOdysseyAssetPath}/classes/warrior.png`
+    );
+
+    this.load.image(
+      CLASSES_ASSET_KEYS.PALADIN,
+      `${dragonOdysseyAssetPath}/classes/paladin.png`
+    );
+
+    this.load.image(
+      CLASSES_ASSET_KEYS.GOLEM,
+      `${dragonOdysseyAssetPath}/classes/golem.png`
+    );
+
     // UI Assets
     this.load.image(
       UI_ASSET_KEYS.CURSOR,
@@ -237,6 +262,14 @@ export default class PreLoader extends BaseScene {
     this.load.image(
       WORLD_ASSET_KEYS.WORLD_COLLISION,
       `${dragonOdysseyAssetPath}/map/collision.png`
+    );
+    this.load.spritesheet(
+      WORLD_ASSET_KEYS.BEACH,
+      `${dragonOdysseyAssetPath}/map/interior.png`,
+      {
+        frameWidth: 64,
+        frameHeight: 64,
+      }
     );
     this.load.image(
       WORLD_ASSET_KEYS.WORLD_FOREGROUND,

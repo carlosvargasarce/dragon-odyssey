@@ -223,7 +223,8 @@ export class Character {
 
     return (
       this.#doesPositionCollideWithCollisionLayer(updatedPosition) ||
-      this.#doesPositionCollideWithOtherCharacter(updatedPosition)
+      this.#doesPositionCollideWithOtherCharacter(updatedPosition) ||
+      this.#doesPositionCollideWithObject(updatedPosition)
     );
   }
 
@@ -307,5 +308,23 @@ export class Character {
       });
 
     return collidesWithACharacter;
+  }
+
+  /**
+   * @param {import('../../types/typedef.js').Coordinate} position
+   * @returns {boolean}
+   */
+  #doesPositionCollideWithObject(position) {
+    const { x, y } = position;
+    if (this._objectsToCheckForCollisionsWith.length === 0) {
+      return false;
+    }
+
+    const collidesWithObject = this._objectsToCheckForCollisionsWith.some(
+      (object) => {
+        return object.position.x === x && object.position.y === y;
+      }
+    );
+    return collidesWithObject;
   }
 }

@@ -11,6 +11,7 @@ import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text.utils.js';
 import { NPC } from '../world/characters/npc.js';
 import { Player } from '../world/characters/player.js';
 import { DialogUi } from '../world/dialog-ui.js';
+import { Item } from '../world/item.js';
 import { Menu } from '../world/menu/menu.js';
 import { BaseScene } from './base.js';
 import { SCENE_KEYS } from './scene-keys.js';
@@ -78,6 +79,8 @@ export default class WorldScene extends BaseScene {
   #menu;
   /** @type {WorldSceneData} */
   #sceneData;
+  /** @type {Item[]} */
+  #items;
 
   constructor() {
     super({
@@ -102,7 +105,6 @@ export default class WorldScene extends BaseScene {
     console.log('this.#sceneData WORLD', this.#sceneData);
 
     this.#wildEnemyEncountered = false;
-    this.#npcPlayerIsInteractingWith = undefined;
 
     // Update player location, and map data if the player was knocked out in a battle
     if (this.#sceneData.isPlayerKnockedOut) {
@@ -116,6 +118,9 @@ export default class WorldScene extends BaseScene {
         DIRECTION.DOWN
       );
     }
+
+    this.#npcPlayerIsInteractingWith = undefined;
+    this.#items = [];
   }
 
   create() {
@@ -189,7 +194,10 @@ export default class WorldScene extends BaseScene {
       { assetKey: WORLD_ASSET_KEYS.WORLD_BACKGROUND, assetFrame: 0 }
     ).setOrigin(0);
 
-    //Create NPCS
+    // Create items
+    this.#createItems(map);
+
+    // Create NPCS
     this.#createNPCs(map);
 
     // Create player
@@ -207,6 +215,7 @@ export default class WorldScene extends BaseScene {
         this.#handlePlayerDirectionUpdate();
       },
       otherCharactersToCheckForCollisionsWith: this.#npcs,
+      objectsToCheckForCollisionsWith: this.#items,
     });
 
     this.cameras.main.startFollow(this.#player.sprite);
@@ -414,6 +423,29 @@ export default class WorldScene extends BaseScene {
       this.#dialogUi.showDialogModal(nearbyNpc.messages);
       return;
     }
+
+    // Check for a nearby item and display message about player finding the item
+    let nearbyItemIndex;
+    const nearbyItem = this.#items.find((item, index) => {
+      if (
+        item.position.x === targetPosition.x &&
+        item.position.y === targetPosition.y
+      ) {
+        nearbyItemIndex = index;
+        return true;
+      }
+      return false;
+    });
+
+    if (nearbyItem) {
+      // Add item to inventory and display message to player
+      const item = DataUtils.getItem(this, nearbyItem.itemId);
+      dataManager.addItem(item, 1);
+      nearbyItem.gameObject.destroy();
+      this.#items.splice(nearbyItemIndex, 1);
+      dataManager.addItemPickedUp(nearbyItem.id);
+      this.#dialogUi.showDialogModal([`You found a ${item.name}`]);
+    }
   }
 
   /**
@@ -570,6 +602,56 @@ export default class WorldScene extends BaseScene {
 
       this.#npcs.push(npc);
     });
+  }
+
+  /**
+   * @param {Phaser.Tilemaps.Tilemap} map
+   * @returns {void}
+   */
+  #createItems(map) {
+    const itemObjectLayer = map.getObjectLayer('Item');
+    if (!itemObjectLayer) {
+      return;
+    }
+    const items = itemObjectLayer.objects;
+    const validItems = items.filter((item) => {
+      return item.x !== undefined && item.y !== undefined;
+    });
+
+    /** @type {number[]} */
+    const itemsPickedUp =
+      dataManager.store.get(DATA_MANAGER_STORE_KEYS.ITEMS_PICKED_UP) || [];
+
+    for (const tiledItem of validItems) {
+      /** @type {number} */
+      const itemId = /** @type {TiledObjectProperty[]} */ (
+        tiledItem.properties
+      ).find(
+        (property) => property.name === TILED_ITEM_PROPERTY.ITEM_ID
+      )?.value;
+
+      /** @type {number} */
+      const id = /** @type {TiledObjectProperty[]} */ (
+        tiledItem.properties
+      ).find((property) => property.name === TILED_ITEM_PROPERTY.ID)?.value;
+
+      // @ts-ignore
+      if (itemsPickedUp.includes(id)) {
+        continue;
+      }
+
+      // Create object
+      const item = new Item({
+        scene: this,
+        position: {
+          x: tiledItem.x,
+          y: tiledItem.y - TILE_SIZE,
+        },
+        itemId,
+        id,
+      });
+      this.#items.push(item);
+    }
   }
 
   /**

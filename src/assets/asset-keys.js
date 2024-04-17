@@ -5,6 +5,11 @@ export const BATTLE_BACKGROUND_ASSET_KEYS = Object.freeze({
 
 export const CLASSES_ASSET_KEYS = Object.freeze({
   BERSEKER: 'BERSEKER',
+  ELF: 'ELF',
+  DRUID: 'DRUID',
+  PALADIN: 'PALADIN',
+  WARRIOR: 'WARRIOR',
+  GOLEM: 'GOLEM',
 });
 
 export const ENEMY_ASSET_KEYS = Object.freeze({
@@ -63,6 +68,7 @@ export const WORLD_ASSET_KEYS = Object.freeze({
   WORLD_COLLISION: 'WORLD_COLLISION',
   WORLD_FOREGROUND: 'WORLD_FOREGROUND',
   WORLD_ENCOUNTER_ZONE: 'WORLD_ENCOUNTER_ZONE',
+  BEACH: 'BEACH',
 });
 
 export const CHARACTER_ENTITY_ASSET_KEYS = Object.freeze({
