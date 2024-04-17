@@ -148,9 +148,11 @@ export default class TitleScene extends BaseScene {
 
         if (this.#selectedMenuOption === MAIN_MENU_OPTIONS.NEW_GAME) {
           dataManager.startNewGame(this);
+          this.scene.start(SCENE_KEYS.HISTORY_1_SCENE);
+          return;
         }
 
-        this.scene.start(SCENE_KEYS.HISTORY_1_SCENE);
+        this.scene.start(SCENE_KEYS.WORLD_SCENE);
       }
     );
 
