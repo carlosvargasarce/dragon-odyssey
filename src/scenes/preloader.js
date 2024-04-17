@@ -87,6 +87,11 @@ export default class PreLoader extends BaseScene {
     );
 
     this.load.image(
+      ENEMY_ASSET_KEYS.VESPERWING,
+      `${dragonOdysseyAssetPath}/enemies/vesperwing.png`
+    );
+
+    this.load.image(
       ENEMY_ASSET_KEYS.IGUANIGNITE,
       `${dragonOdysseyAssetPath}/enemies/iguanignite.png`
     );
@@ -167,6 +172,7 @@ export default class PreLoader extends BaseScene {
     this.load.json(DATA_ASSET_KEYS.ITEMS, 'assets/data/items.json');
     this.load.json(DATA_ASSET_KEYS.ENEMIES, 'assets/data/enemies.json');
     this.load.json(DATA_ASSET_KEYS.CHARACTERS, 'assets/data/characters.json');
+    this.load.json(DATA_ASSET_KEYS.ENCOUNTERS, 'assets/data/encounters.json');
 
     // Load Custom Fonts
     this.load.addFile(
@@ -186,6 +192,24 @@ export default class PreLoader extends BaseScene {
     this.load.spritesheet(
       ATTACK_ASSET_KEYS.ICE_SHARD_START,
       `${dragonOdysseyAssetPath}/attacks/ice-attack/start.png`,
+      {
+        frameWidth: 32,
+        frameHeight: 32,
+      }
+    );
+
+    this.load.spritesheet(
+      ATTACK_ASSET_KEYS.MUD_SHOT,
+      `${dragonOdysseyAssetPath}/attacks/mud-attack/active.png`,
+      {
+        frameWidth: 32,
+        frameHeight: 32,
+      }
+    );
+
+    this.load.spritesheet(
+      ATTACK_ASSET_KEYS.MUD_SHOT_START,
+      `${dragonOdysseyAssetPath}/attacks/mud-attack/start.png`,
       {
         frameWidth: 32,
         frameHeight: 32,

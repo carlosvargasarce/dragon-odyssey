@@ -5,6 +5,7 @@ import { playBackgroundMusic, playSoundFx } from '../utils/audio-utils.js';
 import { DATA_MANAGER_STORE_KEYS, dataManager } from '../utils/data-manager.js';
 import { DataUtils } from '../utils/data-utils.js';
 import { getTargetPositionFromGameObjectPositionAndDirection } from '../utils/grid-utils.js';
+import { weightedRandom } from '../utils/random.js';
 import SpriteFacade from '../utils/spriteFacade.js';
 import { CANNOT_READ_SIGN_TEXT, SAMPLE_TEXT } from '../utils/text.utils.js';
 import { NPC } from '../world/characters/npc.js';
@@ -36,6 +37,20 @@ const TILED_NPC_PROPERTY = Object.freeze({
   MOVEMENT_PATTERN: 'movement_pattern',
   MESSAGES: 'messages',
   FRAME: 'frame',
+});
+
+const TILED_ENCOUNTER_PROPERTY = Object.freeze({
+  AREA: 'area',
+});
+
+const TILED_ITEM_PROPERTY = Object.freeze({
+  ITEM_ID: 'item_id',
+  ID: 'id',
+});
+
+const TILED_AREA_METADATA_PROPERTY = Object.freeze({
+  FAINT_LOCATION: 'faint_location',
+  ID: 'id',
 });
 
 /**
@@ -434,8 +449,21 @@ export default class WorldScene extends BaseScene {
     this.#wildEnemyEncountered = Math.random() < 0.2;
 
     if (this.#wildEnemyEncountered) {
+      const encounterAreaId = /** @type {TiledObjectProperty[]} */ (
+        this.#encounterLayer.layer.properties
+      ).find(
+        (property) => property.name === TILED_ENCOUNTER_PROPERTY.AREA
+      ).value;
+
+      const possibleMonsters = DataUtils.getEncounterAreaDetails(
+        this,
+        encounterAreaId
+      );
+
+      const randomEnemyId = weightedRandom(possibleMonsters);
+
       console.log(
-        `[${WorldScene.name}:handlePlayerMovementUpdate] player encountered a wild monster`
+        `[${WorldScene.name}:handlePlayerMovementUpdate] player encountered a wild monster in area ${encounterAreaId} and enemy id has been picked randomly ${randomEnemyId}`
       );
       this.cameras.main.fadeOut(2000);
       this.cameras.main.once(
@@ -443,7 +471,7 @@ export default class WorldScene extends BaseScene {
         () => {
           /** @type {import('./battle.js').BattleSceneData} */
           const dataToPass = {
-            enemyCharacters: [DataUtils.getEnemyById(this, 1)],
+            enemyCharacters: [DataUtils.getEnemyById(this, randomEnemyId)],
             playerCharacters: dataManager.store.get(
               DATA_MANAGER_STORE_KEYS.ALLIES_IN_PARTY
             ),

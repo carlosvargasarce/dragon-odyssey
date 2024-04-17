@@ -5,70 +5,22 @@
     "name": "FERNBITE",
     "assetKey": "FERNBITE",
     "assetFrame": 0,
-    "currentHp": 100,
-    "maxHp": 100,
-    "attackIds": [1],
-    "baseAttack": 20,
-    "currentLevel": 5
+    "currentHp": 25,
+    "maxHp": 25,
+    "attackIds": [3],
+    "baseAttack": 6,
+    "currentLevel": 1
   },
   {
     "id": 2,
     "monsterId": 2,
-    "name": "IGUANIGNITE",
-    "assetKey": "IGUANIGNITE",
+    "name": "VESPERWING",
+    "assetKey": "VESPERWING",
     "assetFrame": 0,
-    "currentHp": 25,
-    "maxHp": 25,
-    "attackIds": [2],
-    "baseAttack": 5,
-    "currentLevel": 5
-  },
-  {
-    "id": 3,
-    "monsterId": 3,
-    "name": "CARNODUSK",
-    "assetKey": "CARNODUSK",
-    "assetFrame": 0,
-    "currentHp": 25,
-    "maxHp": 25,
+    "currentHp": 20,
+    "maxHp": 20,
     "attackIds": [1],
-    "baseAttack": 5,
-    "currentLevel": 5
-  },
-  {
-    "id": 4,
-    "monsterId": 4,
-    "name": "IGNIVOLT",
-    "assetKey": "IGNIVOLT",
-    "assetFrame": 0,
-    "currentHp": 25,
-    "maxHp": 25,
-    "attackIds": [2],
-    "baseAttack": 5,
-    "currentLevel": 5
-  },
-  {
-    "id": 5,
-    "monsterId": 5,
-    "name": "AQUAVALOR",
-    "assetKey": "AQUAVALOR",
-    "assetFrame": 0,
-    "currentHp": 25,
-    "maxHp": 25,
-    "attackIds": [2],
-    "baseAttack": 5,
-    "currentLevel": 5
-  },
-  {
-    "id": 6,
-    "monsterId": 6,
-    "name": "FROSTSABER",
-    "assetKey": "FROSTSABER",
-    "assetFrame": 0,
-    "currentHp": 25,
-    "maxHp": 25,
-    "attackIds": [1],
-    "baseAttack": 5,
-    "currentLevel": 5
+    "baseAttack": 7,
+    "currentLevel": 1
   }
 ]

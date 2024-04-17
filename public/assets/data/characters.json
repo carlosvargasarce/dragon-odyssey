@@ -5,10 +5,10 @@
     "name": "BERSEKER",
     "assetKey": "BERSEKER",
     "assetFrame": 0,
-    "currentHp": 25,
-    "maxHp": 25,
+    "currentHp": 35,
+    "maxHp": 35,
     "attackIds": [2],
     "baseAttack": 5,
-    "currentLevel": 5
+    "currentLevel": 1
   }
 ]

@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-//import { IceShard } from '../battle/attacks/ice-shard.js';
 import { AUDIO_ASSET_KEYS } from '../assets/asset-keys.js';
 import {
   ATTACK_TARGET,
@@ -122,7 +121,7 @@ export default class Battle extends BaseScene {
 
     let enemyPrototype = new EnemyBattleCharacter({
       scene: this,
-      characterDetails: DataUtils.getEnemyById(this, 1),
+      characterDetails: this.#sceneData.enemyCharacters[0],
       skipBattleAnimations: this.#skipAnimations,
     });
 
@@ -133,9 +132,7 @@ export default class Battle extends BaseScene {
 
     this.#activePlayerCharacter = new PlayerBattleCharacter({
       scene: this,
-      characterDetails: dataManager.store.get(
-        DATA_MANAGER_STORE_KEYS.ALLIES_IN_PARTY
-      )[0],
+      characterDetails: this.#sceneData.playerCharacters[0],
       skipBattleAnimations: this.#skipAnimations,
     });
 

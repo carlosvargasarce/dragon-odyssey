@@ -51,6 +51,17 @@ export class DataUtils {
   }
 
   /**
+   * @param {Phaser.Scene} scene the Phaser 3 Scene to get cached JSON file from
+   * @param {number} areaId the area id to pull monster encounter details for
+   * @returns {number[][]}
+   */
+  static getEncounterAreaDetails(scene, areaId) {
+    /** @type {import('../types/typedef.js').EncounterData} */
+    const data = scene.cache.json.get(DATA_ASSET_KEYS.ENCOUNTERS);
+    return data[areaId];
+  }
+
+  /**
    * Utility function for retrieving all the animations from animations.json data file.
    * @param {Phaser.Scene} scene
    * @returns {import('../types/typedef.js').Animation[]}

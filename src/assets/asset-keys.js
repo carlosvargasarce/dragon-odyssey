@@ -11,6 +11,7 @@ export const ENEMY_ASSET_KEYS = Object.freeze({
   IGUANIGNITE: 'IGUANIGNITE',
   SKELETON: 'SKELETON',
   FERNBITE: 'FERNBITE',
+  VESPERWING: 'VESPERWING',
 });
 
 export const BATTLE_ASSET_KEYS = Object.freeze({
@@ -44,11 +45,15 @@ export const DATA_ASSET_KEYS = Object.freeze({
   ITEMS: 'ITEMS',
   ENEMIES: 'ENEMIES',
   CHARACTERS: 'CHARACTERS',
+  ENCOUNTERS: 'ENCOUNTERS',
+  NPCS: 'NPCS',
 });
 
 export const ATTACK_ASSET_KEYS = Object.freeze({
   ICE_SHARD: 'ICE_SHARD',
   ICE_SHARD_START: 'ICE_SHARD_START',
+  MUD_SHOT: 'MUD_SHOT',
+  MUD_SHOT_START: 'MUD_SHOT_START',
   SLASH: 'SLASH',
 });
 
