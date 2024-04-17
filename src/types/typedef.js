@@ -39,7 +39,7 @@ import { ATTACK_KEYS } from '../battle/attacks/attack-keys.js';
 
 /** @enum {ItemEffect} */
 export const ITEM_EFFECT = Object.freeze({
-  HEAL_30: 'HEAL_30',
+  HEAL_120: 'HEAL_120',
 });
 
 /**

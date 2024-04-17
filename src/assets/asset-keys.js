@@ -17,6 +17,7 @@ export const ENEMY_ASSET_KEYS = Object.freeze({
   SKELETON: 'SKELETON',
   FERNBITE: 'FERNBITE',
   VESPERWING: 'VESPERWING',
+  MUDCLAW: 'MUDCLAW',
 });
 
 export const BATTLE_ASSET_KEYS = Object.freeze({
@@ -98,6 +99,8 @@ export const INVENTORY_ASSET_KEYS = Object.freeze({
 
 export const HISTORY_ASSET_KEYS = Object.freeze({
   HISTORY_1: 'HISTORY_1',
+  HISTORY_2: 'HISTORY_2',
+  HISTORY_3: 'HISTORY_3',
 });
 
 export const AUDIO_ASSET_KEYS = Object.freeze({

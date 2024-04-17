@@ -92,6 +92,11 @@ export default class PreLoader extends BaseScene {
     );
 
     this.load.image(
+      ENEMY_ASSET_KEYS.MUDCLAW,
+      `${dragonOdysseyAssetPath}/enemies/mudclaw.png`
+    );
+
+    this.load.image(
       ENEMY_ASSET_KEYS.IGUANIGNITE,
       `${dragonOdysseyAssetPath}/enemies/iguanignite.png`
     );
@@ -330,6 +335,16 @@ export default class PreLoader extends BaseScene {
     this.load.image(
       HISTORY_ASSET_KEYS.HISTORY_1,
       `${dragonOdysseyAssetPath}/history/history-1.png`
+    );
+
+    this.load.image(
+      HISTORY_ASSET_KEYS.HISTORY_2,
+      `${dragonOdysseyAssetPath}/history/history-2.jpg`
+    );
+
+    this.load.image(
+      HISTORY_ASSET_KEYS.HISTORY_3,
+      `${dragonOdysseyAssetPath}/history/history-3.jpg`
     );
   }
 
