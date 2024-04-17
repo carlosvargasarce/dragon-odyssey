@@ -53,7 +53,7 @@ const initialState = {
     battleSceneAnimations: BATTLE_SCENE_OPTIONS.ON,
     battleStyle: BATTLE_STYLE_OPTIONS.SHIFT,
     sound: SOUND_OPTIONS.ON,
-    volume: 2,
+    volume: 1,
     menuColor: 0,
   },
   gameStarted: false,
@@ -124,9 +124,20 @@ class DataManager extends Phaser.Events.EventEmitter {
    * @returns {void}
    */
   init(scene) {
-    const startingCharacter = DataUtils.getCharacterById(scene, 1);
+    const character1 = DataUtils.getCharacterById(scene, 1);
+    const character2 = DataUtils.getCharacterById(scene, 2);
+    const character3 = DataUtils.getCharacterById(scene, 3);
+    const character4 = DataUtils.getCharacterById(scene, 4);
+    const character5 = DataUtils.getCharacterById(scene, 5);
+    const character6 = DataUtils.getCharacterById(scene, 6);
+
     this.#store.set(DATA_MANAGER_STORE_KEYS.ALLIES_IN_PARTY, [
-      startingCharacter,
+      character1,
+      character2,
+      character3,
+      character4,
+      character5,
+      character6,
     ]);
   }
 

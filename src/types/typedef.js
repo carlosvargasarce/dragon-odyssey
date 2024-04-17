@@ -22,6 +22,15 @@ import { ATTACK_KEYS } from '../battle/attacks/attack-keys.js';
  * @property {number} currentHp
  * @property {number} baseAttack
  * @property {number[]} attackIds
+ * @property {number} stamina
+ * @property {number} pDef
+ * @property {number} mDef
+ * @property {number} pAtk
+ * @property {number} rangeAtk
+ * @property {number} mAtk
+ * @property {number} atkSpeed
+ * @property {number} precision
+ *
  */
 
 /**
