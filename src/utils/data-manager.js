@@ -53,7 +53,7 @@ const initialState = {
     battleSceneAnimations: BATTLE_SCENE_OPTIONS.ON,
     battleStyle: BATTLE_STYLE_OPTIONS.SHIFT,
     sound: SOUND_OPTIONS.ON,
-    volume: 4,
+    volume: 2,
     menuColor: 0,
   },
   gameStarted: false,

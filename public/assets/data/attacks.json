@@ -10,5 +10,11 @@
     "name": "Slash",
     "animationName": "SLASH",
     "audioKey": "CLAW"
+  },
+  {
+    "id": 3,
+    "name": "Mud Shot",
+    "animationName": "MUD_SHOT",
+    "audioKey": "ICE"
   }
 ]

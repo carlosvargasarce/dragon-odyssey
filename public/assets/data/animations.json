@@ -52,6 +52,22 @@
     "assetKey": "ICE_SHARD"
   },
   {
+    "key": "MUD_SHOT_START",
+    "frameRate": 8,
+    "repeat": 0,
+    "delay": 0,
+    "yoyo": false,
+    "assetKey": "MUD_SHOT_START"
+  },
+  {
+    "key": "MUD_SHOT",
+    "frameRate": 8,
+    "repeat": 0,
+    "delay": 0,
+    "yoyo": false,
+    "assetKey": "MUD_SHOT"
+  },
+  {
     "key": "SLASH",
     "frameRate": 4,
     "repeat": 0,

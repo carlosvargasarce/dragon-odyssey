@@ -1,8 +1,11 @@
 import { exhaustiveGuard } from '../../utils/guard.js';
+import AttackCommand from './attack-command.js';
 import { ATTACK_KEYS } from './attack-keys.js';
 import IceShardFactory from './factories/ice-shard-factory.js';
+import MudShotFactory from './factories/mud-shot-factory.js';
 import SlashFactory from './factories/slash-factory.js';
 import { IceShard } from './ice-shard.js';
+import { MudShot } from './mud-shot.js';
 import { Slash } from './slash.js';
 
 /**
@@ -25,6 +28,8 @@ export class AttackManager {
   #iceShardAttack;
   /** @type {Slash} */
   #slashAttack;
+  /** @type {MudShot} */
+  #mudShotAttack;
 
   /**
    *
@@ -59,25 +64,27 @@ export class AttackManager {
     }
 
     switch (attack) {
-      case ATTACK_KEYS.ICE_SHARD:
-        if (!this.#iceShardAttack) {
-          const iceShardFactory = new IceShardFactory();
-          this.#iceShardAttack = iceShardFactory.createAttack(this.#scene, {
-            x,
-            y,
-          });
-        }
-        this.#iceShardAttack.gameObject.setPosition(x, y);
-        this.#iceShardAttack.playAnimation(callback);
+      case ATTACK_KEYS.ICE_SHARD: {
+        let attack =
+          this.#iceShardAttack ||
+          new IceShardFactory().createAttack(this.#scene, { x, y });
+        new AttackCommand(attack, { x, y }).execute(callback);
         break;
-      case ATTACK_KEYS.SLASH:
-        if (!this.#slashAttack) {
-          const slashFactory = new SlashFactory();
-          this.#slashAttack = slashFactory.createAttack(this.#scene, { x, y });
-        }
-        this.#slashAttack.gameObject.setPosition(x, y);
-        this.#slashAttack.playAnimation(callback);
+      }
+      case ATTACK_KEYS.MUD_SHOT: {
+        let attack =
+          this.#mudShotAttack ||
+          new MudShotFactory().createAttack(this.#scene, { x, y });
+        new AttackCommand(attack, { x, y }).execute(callback);
         break;
+      }
+      case ATTACK_KEYS.SLASH: {
+        let attack =
+          this.#slashAttack ||
+          new SlashFactory().createAttack(this.#scene, { x, y });
+        new AttackCommand(attack, { x, y }).execute(callback);
+        break;
+      }
       default:
         exhaustiveGuard(attack);
     }

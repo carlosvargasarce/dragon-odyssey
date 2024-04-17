@@ -89,3 +89,8 @@ export const ITEM_EFFECT = Object.freeze({
  * @property {boolean} yoyo
  * @property {string} assetKey
  */
+
+/**
+ * @typedef EncounterData
+ * @type {Object.<string, number[][]>}
+ */

@@ -6,5 +6,6 @@
 /** @enum {AttackKeys} */
 export const ATTACK_KEYS = Object.freeze({
   ICE_SHARD: 'ICE_SHARD',
+  MUD_SHOT: 'MUD_SHOT',
   SLASH: 'SLASH',
 });
